@@ -54,4 +54,33 @@ export class MediaService {
       where,
     });
   }
+
+  async deleteMedia(clerkId: string,mediaId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { clerkId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return this.prisma.media.delete({
+      where: { id: mediaId,uploadedById: user.id },
+    });
+  }
+
+  async updateMedia(clerkId: string,mediaId: string,mediaData: any) {
+    const user = await this.prisma.user.findUnique({
+      where: { clerkId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return this.prisma.media.update({
+      where: { id: mediaId,uploadedById: user.id },
+      data: mediaData,
+    });
+  }
 }

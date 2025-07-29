@@ -9,6 +9,8 @@ import {
     BadRequestException,
     Get,
     Query,
+    Delete,
+    Put,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MediaService } from './media.service';
@@ -40,6 +42,20 @@ export class MediaController {
     async getAllMedia(@Req() req: any, @Query('type') type: string) {
         if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
         return this.mediaService.getAllMedia(req.user.sub, type as MediaType);
+    }
+
+    @UseGuards(AuthGuard)
+    @Delete('delete-media')
+    async deleteMedia(@Req() req: any, @Query('mediaId') mediaId: string) {
+        if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
+        return this.mediaService.deleteMedia(req.user.sub, mediaId);
+    }
+
+    @UseGuards(AuthGuard)
+    @Put('update-media')
+    async updateMedia(@Req() req: any, @Query('mediaId') mediaId: string, @Body() mediaData: any) {
+        if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
+        return this.mediaService.updateMedia(req.user.sub, mediaId, mediaData);
     }
 }
 
