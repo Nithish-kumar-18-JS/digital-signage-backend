@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-
+  console.log('Listening on port 3000');
   await app.listen(3000);
 }
 bootstrap();

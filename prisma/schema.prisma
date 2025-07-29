@@ -1,17 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "./prisma/ERD.svg"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  AUDIO
+  HTML
+  RSS
+  DOCUMENT
+}
+
+enum ScreenStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+}
+
+enum ScreenOrientation {
+  LANDSCAPE
+  PORTRAIT
 }
 
 model User {
+  id          String     @id @default(uuid())
+  clerkId     String     @unique
+  email       String     @unique
+  firstName   String?
+  lastName    String?
+  role        UserRole   @default(VIEWER)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime?  @updatedAt
+  uploadedMedia    Media[]
+  createdPlaylists Playlist[]
+}
+
+model Media {
+  id              String     @id @default(uuid())
+  name            String
+  type            MediaType
+  url             String
+  durationSeconds Int        @default(10)
+  uploadedById    String
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  uploadedBy      User       @relation(fields: [uploadedById], references: [id])
+  playlistItems   PlaylistItem[]
+}
+
+model Playlist {
+  id            String              @id @default(uuid())
+  name          String
+  description   String?
+  createdById   String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  createdBy     User                @relation(fields: [createdById], references: [id])
+  items         PlaylistItem[]
+  screenLinks   PlaylistOnScreen[]
+}
+
+model PlaylistItem {
+  id               String     @id @default(uuid())
+  playlistId       String
+  mediaId          String
+  position         Int
+  durationOverride Int?
+  transitionEffect String?
+
+  playlist         Playlist   @relation(fields: [playlistId], references: [id])
+  media            Media      @relation(fields: [mediaId], references: [id])
+}
+
+model Setting {
   id        String   @id @default(uuid())
-  clerkId   String   @unique
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  createdAt DateTime @default(now())
+  screenId  String
+  key       String
+  value     String
+  updatedAt DateTime @updatedAt
+  screen    Screen   @relation(fields: [screenId], references: [id])
+}
+
+
+model Screen {
+  id              String              @id @default(uuid())
+  name            String
+  location        String?
+  status          ScreenStatus        @default(OFFLINE)
+  lastSeen        DateTime?
+  resolution      String?
+  orientation     ScreenOrientation   @default(LANDSCAPE)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  playlistLinks   PlaylistOnScreen[]
+  settings        Setting[]
+}
+
+model PlaylistOnScreen {
+  id           String   @id @default(uuid())
+  playlistId   String
+  screenId     String
+  assignedAt   DateTime @default(now())
+
+  // ⏰ Scheduling fields
+  startTime    DateTime?  // absolute or daily recurring start
+  endTime      DateTime?  // absolute or daily recurring end
+  daysOfWeek   String?    // e.g. "MON,TUE,WED", for weekly recurrence
+  repeatDaily  Boolean    @default(true)
+  priority     Int        @default(0)
+
+  playlist     Playlist @relation(fields: [playlistId], references: [id])
+  screen       Screen   @relation(fields: [screenId], references: [id])
+
+  @@index([screenId, startTime, endTime])
 }
