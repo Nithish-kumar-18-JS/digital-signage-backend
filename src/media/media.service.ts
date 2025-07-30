@@ -47,7 +47,7 @@ export class MediaService {
       throw new Error('User not found');
     }
 
-    const where: { uploadedById: string; type?: MediaType } = {
+    const where: { uploadedById: number; type?: MediaType } = {
       uploadedById: user.id,
     };
 
@@ -60,7 +60,7 @@ export class MediaService {
     return response;
   }
 
-  async deleteMedia(clerkId: string, mediaId: string) {
+  async deleteMedia(clerkId: string, mediaId: number) {
     const user = await this.prisma.user.findUnique({
       where: { clerkId },
     });
@@ -74,7 +74,7 @@ export class MediaService {
     });
   }
 
-  async updateMedia(clerkId: string, mediaId: string, mediaData: any) {
+  async updateMedia(clerkId: string, mediaId: number, mediaData: any) {
     const user = await this.prisma.user.findUnique({
       where: { clerkId },
     });

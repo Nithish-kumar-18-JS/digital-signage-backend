@@ -53,7 +53,7 @@ export class MediaController {
   @Delete('delete-media')
   async deleteMedia(@Req() req: any, @Query('mediaId') mediaId: string) {
     if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
-    return this.mediaService.deleteMedia(req.user.sub, mediaId);
+    return this.mediaService.deleteMedia(req.user.sub, Number(mediaId));
   }
 
   @UseGuards(AuthGuard)
@@ -64,6 +64,6 @@ export class MediaController {
     @Body() mediaData: any,
   ) {
     if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
-    return this.mediaService.updateMedia(req.user.sub, mediaId, mediaData);
+    return this.mediaService.updateMedia(req.user.sub, Number(mediaId), mediaData);
   }
 }

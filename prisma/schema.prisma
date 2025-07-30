@@ -2,11 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "./prisma/ERD.svg"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -39,7 +34,7 @@ enum ScreenOrientation {
 }
 
 model User {
-  id          String     @id @default(uuid())
+  id          Int        @id @default(autoincrement())
   clerkId     String     @unique
   email       String     @unique
   firstName   String?
@@ -51,13 +46,14 @@ model User {
   createdPlaylists Playlist[]
 }
 
+
 model Media {
-  id              String     @id @default(uuid())
+  id              Int     @id @default(autoincrement())
   name            String
   type            MediaType
   url             String
   durationSeconds Int        @default(10)
-  uploadedById    String
+  uploadedById    Int        // 🔄 Changed from String → Int
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   uploadedBy      User       @relation(fields: [uploadedById], references: [id])
@@ -65,10 +61,10 @@ model Media {
 }
 
 model Playlist {
-  id            String              @id @default(uuid())
+  id            Int              @id @default(autoincrement())
   name          String
   description   String?
-  createdById   String
+  createdById   Int                 // 🔄 Changed from String → Int
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
@@ -78,9 +74,9 @@ model Playlist {
 }
 
 model PlaylistItem {
-  id               String     @id @default(uuid())
-  playlistId       String
-  mediaId          String
+  id               Int     @id @default(autoincrement())
+  playlistId       Int
+  mediaId          Int
   position         Int
   durationOverride Int?
   transitionEffect String?
@@ -90,8 +86,8 @@ model PlaylistItem {
 }
 
 model Setting {
-  id        String   @id @default(uuid())
-  screenId  String
+  id        Int   @id @default(autoincrement())
+  screenId  Int
   key       String
   value     String
   updatedAt DateTime @updatedAt
@@ -100,7 +96,7 @@ model Setting {
 
 
 model Screen {
-  id              String              @id @default(uuid())
+  id              Int              @id @default(autoincrement())
   name            String
   location        String?
   status          ScreenStatus        @default(OFFLINE)
@@ -115,9 +111,9 @@ model Screen {
 }
 
 model PlaylistOnScreen {
-  id           String   @id @default(uuid())
-  playlistId   String
-  screenId     String
+  id           Int   @id @default(autoincrement())
+  playlistId   Int
+  screenId     Int
   assignedAt   DateTime @default(now())
 
   // ⏰ Scheduling fields
