@@ -1,32 +1,25 @@
-# Use Node 20 LTS
-FROM node:20
+FROM node:18
 
 WORKDIR /app
 
-# Copy only package files first to use cached layers
+# Install deps
 COPY package*.json ./
-
 RUN npm install
 
-# Copy Prisma schema only for generate step
+# Copy env + prisma schema before generate
+COPY .env .env
 COPY prisma ./prisma
+RUN npx prisma generate
 
-# Generate Prisma client only (no DB connection required)
-RUN npx prisma generate --no-engine
-
-# Copy rest of app
+# Copy the rest
 COPY . .
 
-# Build NestJS app
+# Apply Prisma migration
+RUN npx prisma migrate deploy
+
+# Build app
 RUN npm run build
-
-# Copy runtime startup script
-COPY start.sh .
-
-# Make it executable
-RUN chmod +x start.sh
 
 EXPOSE 3000
 
-# Run app using start.sh
-CMD ["./start.sh"]
+CMD ["node", "dist/main"]
