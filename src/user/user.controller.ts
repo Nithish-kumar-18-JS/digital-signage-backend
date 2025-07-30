@@ -10,7 +10,7 @@ export class UserController {
   @Get('me')
   async getMe(@Req() req) {
     const user = await this.userService.findOrCreateUser(req.user.sub);
-    console.log("user", user);
+    console.log('user', user);
     return user;
   }
 }

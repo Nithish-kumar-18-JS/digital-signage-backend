@@ -7,21 +7,20 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async findOrCreateUser(clerkUser: string) {
-  
     const clerkId = clerkUser;
-  
+
     if (!clerkId) {
       throw new Error('Missing Clerk user ID');
     }
-  
+
     const existing = await this.prisma.user.findUnique({
       where: {
         clerkId: clerkId,
       },
     });
-  
+
     if (existing) return existing;
-  
+
     const user = await clerkClient.users.getUser(clerkUser);
 
     const created = await this.prisma.user.create({
@@ -32,8 +31,7 @@ export class UserService {
         lastName: user.lastName,
       },
     });
-  
+
     return created;
   }
 }
-  

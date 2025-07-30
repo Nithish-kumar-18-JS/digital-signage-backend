@@ -8,10 +8,12 @@ import { MediaService } from './media/media.service';
 import { MediaController } from './media/media.controller';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-  })],
-  providers: [ClerkService, UserService, PrismaService,MediaService],
-  controllers: [UserController,MediaController],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
+  providers: [ClerkService, UserService, PrismaService, MediaService],
+  controllers: [UserController, MediaController],
 })
 export class AppModule {}

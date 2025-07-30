@@ -6,7 +6,12 @@ import { MediaType } from '@prisma/client';
 export class MediaService {
   constructor(private prisma: PrismaService) {}
 
-  async createMedia(file: Express.Multer.File, name: string,type:MediaType, clerkId: string) {
+  async createMedia(
+    file: Express.Multer.File,
+    name: string,
+    type: MediaType,
+    clerkId: string,
+  ) {
     if (!file) throw new Error('No file uploaded');
     if (!name) throw new Error('Name is required');
 
@@ -33,7 +38,7 @@ export class MediaService {
     return this.prisma.media.create({ data: mediaData });
   }
 
-  async getAllMedia(clerkId: string,type?:MediaType) {
+  async getAllMedia(clerkId: string, type?: MediaType) {
     const user = await this.prisma.user.findUnique({
       where: { clerkId },
     });
@@ -42,20 +47,20 @@ export class MediaService {
       throw new Error('User not found');
     }
 
-    let where:any = {
-        uploadedById: user.id,
-    }
+    const where: { uploadedById: string; type?: MediaType } = {
+      uploadedById: user.id,
+    };
 
-    if(type){
-        where.type = type
+    if (type) {
+      where.type = type;
     }
-
-    return this.prisma.media.findMany({
+    const response = await this.prisma.media.findMany({
       where,
     });
+    return response;
   }
 
-  async deleteMedia(clerkId: string,mediaId: string) {
+  async deleteMedia(clerkId: string, mediaId: string) {
     const user = await this.prisma.user.findUnique({
       where: { clerkId },
     });
@@ -65,11 +70,11 @@ export class MediaService {
     }
 
     return this.prisma.media.delete({
-      where: { id: mediaId,uploadedById: user.id },
+      where: { id: mediaId, uploadedById: user.id },
     });
   }
 
-  async updateMedia(clerkId: string,mediaId: string,mediaData: any) {
+  async updateMedia(clerkId: string, mediaId: string, mediaData: any) {
     const user = await this.prisma.user.findUnique({
       where: { clerkId },
     });
@@ -79,7 +84,7 @@ export class MediaService {
     }
 
     return this.prisma.media.update({
-      where: { id: mediaId,uploadedById: user.id },
+      where: { id: mediaId, uploadedById: user.id },
       data: mediaData,
     });
   }
