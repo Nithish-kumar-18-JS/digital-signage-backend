@@ -21,8 +21,9 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/signage
-      CLERK_SECRET_KEY: your_clerk_secret_key_here
+      DATABASE_URL: postgresql://neondb_owner:npg_B8imsfdLxO9Y@ep-soft-dust-a1p6geg5-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      CLERK_SECRET_KEY: sk_test_Wz4rgtqRoCBEJuN0MoKUazSlfKs9ByEM03kqbhFOII
+      CLERK_ISSUER: https://flying-egret-38.clerk.accounts.dev
     ports:
       - '3000:3000'
     volumes:
