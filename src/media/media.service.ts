@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { MediaType } from '@prisma/client';
 
@@ -12,8 +12,8 @@ export class MediaService {
     type: MediaType,
     clerkId: string,
   ) {
-    if (!file) throw new Error('No file uploaded');
-    if (!name) throw new Error('Name is required');
+    if (!file) throw new BadRequestException('No file uploaded');
+    if (!name) throw new BadRequestException('Name is required');
 
     const imageBase64 = file.buffer.toString('base64');
 
@@ -22,13 +22,13 @@ export class MediaService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     const mediaData = {
       name,
-      url: `data:${file.mimetype};base64,${imageBase64}`, // <- dynamic MIME type
-      type: type,
+      url: `data:${file.mimetype};base64,${imageBase64}`,
+      type,
       uploadedById: user.id,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -44,7 +44,7 @@ export class MediaService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     const where: { uploadedById: number; type?: MediaType } = {
@@ -54,10 +54,8 @@ export class MediaService {
     if (type) {
       where.type = type;
     }
-    const response = await this.prisma.media.findMany({
-      where,
-    });
-    return response;
+
+    return this.prisma.media.findMany({ where });
   }
 
   async deleteMedia(clerkId: string, mediaId: number) {
@@ -66,11 +64,19 @@ export class MediaService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
+    }
+
+    const media = await this.prisma.media.findFirst({
+      where: { id: mediaId, uploadedById: user.id },
+    });
+
+    if (!media) {
+      throw new NotFoundException('Media not found or access denied');
     }
 
     return this.prisma.media.delete({
-      where: { id: mediaId, uploadedById: user.id },
+      where: { id: mediaId },
     });
   }
 
@@ -80,11 +86,19 @@ export class MediaService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
+    }
+
+    const existing = await this.prisma.media.findFirst({
+      where: { id: mediaId, uploadedById: user.id },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Media not found or access denied');
     }
 
     return this.prisma.media.update({
-      where: { id: mediaId, uploadedById: user.id },
+      where: { id: mediaId },
       data: mediaData,
     });
   }
