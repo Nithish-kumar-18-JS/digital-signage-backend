@@ -7,15 +7,13 @@ export class MediaService {
   constructor(private prisma: PrismaService) {}
 
   async createMedia(
-    file: Express.Multer.File,
+    file: string,
     name: string,
     type: MediaType,
     clerkId: string,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
     if (!name) throw new BadRequestException('Name is required');
-
-    const imageBase64 = file.buffer.toString('base64');
 
     const user = await this.prisma.user.findUnique({
       where: { clerkId },
@@ -27,7 +25,7 @@ export class MediaService {
 
     const mediaData = {
       name,
-      url: `data:${file.mimetype};base64,${imageBase64}`,
+      url: file,
       type,
       uploadedById: user.id,
       createdAt: new Date(),
@@ -101,5 +99,32 @@ export class MediaService {
       where: { id: mediaId },
       data: mediaData,
     });
+  }
+
+  async searchMedia(clerkId: string, searchQuery: string, type?: MediaType) {
+    const user = await this.prisma.user.findUnique({
+      where: { clerkId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const where: { uploadedById: number; name?: any; type?: MediaType } = {
+      uploadedById: user.id,
+    };
+
+    if (searchQuery) {
+      where.name = {
+        contains: searchQuery,
+        mode: 'insensitive',
+      };
+    }
+
+    if (type) {
+      where.type = type;
+    }
+
+    return this.prisma.media.findMany({ where });
   }
 }

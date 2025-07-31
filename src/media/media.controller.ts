@@ -1,8 +1,6 @@
 import {
   Controller,
   Post,
-  UseInterceptors,
-  UploadedFile,
   Body,
   Req,
   UseGuards,
@@ -12,7 +10,6 @@ import {
   Delete,
   Put,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { MediaService } from './media.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { MediaType } from '@prisma/client';
@@ -23,13 +20,13 @@ export class MediaController {
 
   @UseGuards(AuthGuard)
   @Post('add-media')
-  @UseInterceptors(FileInterceptor('file'))
   async addMedia(
-    @UploadedFile() file: Express.Multer.File,
+    @Body('url') file: string,
     @Body('name') name: string,
     @Body('type') type: string,
     @Req() req: any,
   ) {
+    console.log({file,name,type});
     if (!file) throw new BadRequestException('No file provided');
     if (!name) throw new BadRequestException('Name is required');
     if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
@@ -65,5 +62,12 @@ export class MediaController {
   ) {
     if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
     return this.mediaService.updateMedia(req.user.sub, Number(id), mediaData);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('search-media')
+  async searchMedia(@Req() req: any, @Query('search') query: string , @Query('type') type: string) {
+    if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
+    return this.mediaService.searchMedia(req.user.sub, query, type as MediaType);
   }
 }

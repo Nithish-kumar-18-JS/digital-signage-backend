@@ -14,12 +14,12 @@ enum UserRole {
 }
 
 enum MediaType {
-  IMAGE
-  VIDEO
-  AUDIO
-  HTML
-  RSS
-  DOCUMENT
+  image
+  video
+  audio
+  html
+  rss
+  document
 }
 
 enum ScreenStatus {

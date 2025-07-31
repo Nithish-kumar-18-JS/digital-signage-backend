@@ -6,6 +6,8 @@ import { UserController } from './user/user.controller';
 import { PrismaService } from './prisma.service';
 import { MediaService } from './media/media.service';
 import { MediaController } from './media/media.controller';
+import { UploadController } from './upload/upload.controller';
+import { R2Service } from './upload/r2.service';
 
 @Module({
   imports: [
@@ -13,7 +15,7 @@ import { MediaController } from './media/media.controller';
       isGlobal: true,
     }),
   ],
-  providers: [ClerkService, UserService, PrismaService, MediaService],
-  controllers: [UserController, MediaController],
+  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service],
+  controllers: [UserController, MediaController, UploadController],
 })
 export class AppModule {}
