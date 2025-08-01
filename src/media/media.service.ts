@@ -23,10 +23,15 @@ export class MediaService {
       throw new NotFoundException('User not found');
     }
 
+    const formatType = (type: string) => {
+      return type.replace(/s/g, '').toUpperCase().replace(/\s/g, '_') as MediaType;
+    };
+    
+
     const mediaData = {
       name,
       url: file,
-      type,
+      type: formatType(type),
       uploadedById: user.id,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -49,8 +54,12 @@ export class MediaService {
       uploadedById: user.id,
     };
 
+    const formatType = (type: string) => {
+      return type.toUpperCase().replace(/\s/g, '') as MediaType;
+    }
+
     if (type) {
-      where.type = type;
+      where.type = formatType(type);
     }
 
     return this.prisma.media.findMany({ where });
@@ -95,6 +104,14 @@ export class MediaService {
       throw new NotFoundException('Media not found or access denied');
     }
 
+    const formatType = (type: string) => {
+      return type.replace(/s/g, '').toUpperCase().replace(/\s/g, '') as MediaType;
+    };
+
+    if (mediaData.type) {
+      mediaData.type = formatType(mediaData.type);
+    }
+
     return this.prisma.media.update({
       where: { id: mediaId },
       data: mediaData,
@@ -121,8 +138,13 @@ export class MediaService {
       };
     }
 
+    const formatType = (type: string) => {
+      return type.replace(/s/g, '').toUpperCase().replace(/\s/g, '') as MediaType;
+    };
+    
+
     if (type) {
-      where.type = type;
+      where.type = formatType(type);
     }
 
     return this.prisma.media.findMany({ where });
