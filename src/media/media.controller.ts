@@ -1,73 +1,67 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
+  Param,
+  Put,
+  Delete,
+  Query,
   Req,
   UseGuards,
   BadRequestException,
-  Get,
-  Query,
-  Delete,
-  Put,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { AuthGuard } from '../auth/auth.guard';
-import { MediaType } from '@prisma/client';
+import { CreateMediaDto } from './dto/create-media.dto';
+import { UpdateMediaDto } from './dto/update-media.dto';
+import { Request } from 'express';
+import { AuthRequest } from 'src/types/auth-request';
 
 @Controller('media')
+@UseGuards(AuthGuard)
 export class MediaController {
-  constructor(private mediaService: MediaService) {}
+  constructor(private readonly mediaService: MediaService) {}
 
-  @UseGuards(AuthGuard)
-  @Post('add-media')
-  async addMedia(
-    @Body('url') file: string,
-    @Body('name') name: string,
-    @Body('type') type: string,
-    @Req() req: any,
-  ) {
-    console.log({file,name,type});
-    if (!file) throw new BadRequestException('No file provided');
-    if (!name) throw new BadRequestException('Name is required');
-    if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
-
-    return this.mediaService.createMedia(
-      file,
-      name,
-      type as MediaType,
-      req.user.sub,
-    );
+  @Post()
+  async create(@Body() dto: CreateMediaDto, @Req() req: AuthRequest) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
+    return this.mediaService.createMedia(dto, clerkId);
   }
 
-  @UseGuards(AuthGuard)
-  @Get('all-media')
-  async getAllMedia(@Req() req: any, @Query('type') type: string) {
-    if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
-    return this.mediaService.getAllMedia(req.user.sub, type as MediaType);
+  @Get()
+  async findAll(@Req() req: AuthRequest, @Query('type') type?: string) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
+    return this.mediaService.getAllMedia(clerkId, type);
   }
 
-  @UseGuards(AuthGuard)
-  @Delete('delete-media')
-  async deleteMedia(@Req() req: any, @Query('id') id: string) {
-    if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
-    return this.mediaService.deleteMedia(req.user.sub, Number(id));
+  @Get('search')
+  async search(@Req() req: AuthRequest, @Query('search') q: string, @Query('type') type?: string) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
+    return this.mediaService.searchMedia(clerkId, q, type);
   }
 
-  @UseGuards(AuthGuard)
-  @Put('update-media')
-  async updateMedia(
-    @Req() req: any,
-    @Query('id') id: string,
-    @Body() mediaData: any,
-  ) {
-    if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
-    return this.mediaService.updateMedia(req.user.sub, Number(id), mediaData);
+  @Get(':id')
+  async findOne(@Param('id') id: string, @Req() req: AuthRequest) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
+    return this.mediaService.findOne(clerkId, +id);
   }
 
-  @UseGuards(AuthGuard)
-  @Get('search-media')
-  async searchMedia(@Req() req: any, @Query('search') query: string , @Query('type') type: string) {
-    if (!req?.user?.sub) throw new BadRequestException('Unauthorized');
-    return this.mediaService.searchMedia(req.user.sub, query, type as MediaType);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateMediaDto, @Req() req: AuthRequest) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
+    return this.mediaService.updateMedia(clerkId, +id, dto);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string, @Req() req: AuthRequest) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
+    return this.mediaService.deleteMedia(clerkId, +id);
   }
 }

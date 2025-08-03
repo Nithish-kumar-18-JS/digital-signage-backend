@@ -8,12 +8,18 @@ import { MediaService } from './media/media.service';
 import { MediaController } from './media/media.controller';
 import { UploadController } from './upload/upload.controller';
 import { R2Service } from './upload/r2.service';
+import { PlaylistsModule } from './playlists/playlists.module';
+import { ScheduleModule } from './schedule/schedule.module';
+import { ScreensModule } from './screens/screens.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    PlaylistsModule,
+    ScheduleModule,
+    ScreensModule,
   ],
   providers: [ClerkService, UserService, PrismaService, MediaService, R2Service],
   controllers: [UserController, MediaController, UploadController],
