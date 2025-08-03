@@ -11,7 +11,9 @@ import { R2Service } from './upload/r2.service';
 import { PlaylistsModule } from './playlists/playlists.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { ScreensModule } from './screens/screens.module';
-
+import { ScreensService } from './screens/screens.service';
+import { ScheduleService } from './schedule/schedule.service';
+import { PlaylistsService } from './playlists/playlists.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,7 +23,7 @@ import { ScreensModule } from './screens/screens.module';
     ScheduleModule,
     ScreensModule,
   ],
-  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service],
+  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService],
   controllers: [UserController, MediaController, UploadController],
 })
 export class AppModule {}
