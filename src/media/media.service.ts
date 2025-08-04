@@ -41,7 +41,7 @@ export class MediaService {
 
   async findOne(clerkId: string, mediaId: number) {
     const user = await this.getUserByClerkId(clerkId);
-    const media = await this.prisma.media.findFirst({
+    const media = await this.prisma.media.findUnique({
       where: { id: mediaId, uploadedById: user.id },
     });
     if (!media) throw new NotFoundException('Media not found or access denied');
@@ -50,7 +50,7 @@ export class MediaService {
 
   async updateMedia(clerkId: string, mediaId: number, data: UpdateMediaDto) {
     const user = await this.getUserByClerkId(clerkId);
-    const existing = await this.prisma.media.findFirst({
+    const existing = await this.prisma.media.findUnique({
       where: { id: mediaId, uploadedById: user.id },
     });
     if (!existing) throw new NotFoundException('Media not found or access denied');
