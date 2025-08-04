@@ -1,3 +1,4 @@
+import { PlaylistItem, PlaylistOnScreen } from '@prisma/client';
 import { IsString, IsOptional } from 'class-validator';
 
 export class CreatePlaylistDto {
@@ -7,4 +8,7 @@ export class CreatePlaylistDto {
   @IsOptional()
   @IsString()
   description?: string;
+  items?: PlaylistItem[];
+  screenLinks?: PlaylistOnScreen[];
+
 }

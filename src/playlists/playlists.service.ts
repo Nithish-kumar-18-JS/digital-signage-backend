@@ -16,8 +16,22 @@ export class PlaylistsService {
 
   async create(dto: CreatePlaylistDto, clerkId: string): Promise<Playlist> {
     const userId = await this.getUserId(clerkId);
+  
     return this.prisma.playlist.create({
-      data: { ...dto, createdById: userId },
+      data: {
+        name: dto.name, // or any other scalar fields
+        createdById: userId,
+        items: {
+          create: dto.items || [],
+        },
+        screenLinks: {
+          create: dto.screenLinks || [],
+        },
+      },
+      include: {
+        items: true,
+        screenLinks: true,
+      },
     });
   }
 
@@ -41,7 +55,31 @@ export class PlaylistsService {
     await this.findOne(id, clerkId); // ensures ownership
     return this.prisma.playlist.update({
       where: { id },
-      data: dto,
+      data: {
+        name: dto.name,
+        description: dto.description,
+        items: {
+          deleteMany: dto.items?.map(item => ({ id: item.id })),
+          create: dto.items?.map(item => ({
+            playlistId: id,
+            mediaId: item.mediaId,
+            position: item.position,
+            durationOverride: item.durationOverride,
+            transitionEffect: item.transitionEffect,
+          })),
+        },
+        screenLinks: {
+          deleteMany: dto.screenLinks?.map(link => ({ id: link.id })),
+          create: dto.screenLinks?.map(link => ({
+            screenId: link.screenId,
+            startTime: link.startTime,
+            endTime: link.endTime,
+            daysOfWeek: link.daysOfWeek,
+            repeatDaily: link.repeatDaily,
+            priority: link.priority,
+          })),
+        },
+      },
     });
   }
 

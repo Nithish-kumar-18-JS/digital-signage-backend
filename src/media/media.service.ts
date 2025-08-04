@@ -65,7 +65,7 @@ export class MediaService {
 
   async deleteMedia(clerkId: string, mediaId: number) {
     const user = await this.getUserByClerkId(clerkId);
-    const media = await this.prisma.media.findFirst({
+    const media = await this.prisma.media.findUnique({
       where: { id: mediaId, uploadedById: user.id },
     });
     if (!media) throw new NotFoundException('Media not found or access denied');

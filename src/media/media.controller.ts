@@ -30,7 +30,7 @@ export class MediaController {
     return this.mediaService.createMedia(dto, clerkId);
   }
 
-  @Get()
+  @Get('/all-media')
   async findAll(@Req() req: AuthRequest, @Query('type') type?: string) {
     const clerkId = req?.user?.sub;
     if (!clerkId) throw new BadRequestException('Unauthorized');
