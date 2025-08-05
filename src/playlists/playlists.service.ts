@@ -19,14 +19,28 @@ export class PlaylistsService {
   
     return this.prisma.playlist.create({
       data: {
-        name: dto.name, // or any other scalar fields
+        name: dto.name,
+        description: dto.description,
         createdById: userId,
-        items: {
-          create: dto.items || [],
-        },
-        screenLinks: {
-          create: dto.screenLinks || [],
-        },
+        items: dto.items ? {
+          create: dto.items.map((mediaId, index) => ({
+            mediaId,
+            position: index,
+            durationOverride: null,
+            transitionEffect: null
+          }))
+        } : undefined,
+        screenLinks: dto.screenLinks ? {
+          create: dto.screenLinks.map((screenId, index) => ({
+            screenId,
+            assignedAt: new Date(),
+            startTime: null,
+            endTime: null,
+            daysOfWeek: null,
+            repeatDaily: false,
+            priority: index
+          }))
+        } : undefined,
       },
       include: {
         items: true,
@@ -52,37 +66,45 @@ export class PlaylistsService {
   }
 
   async update(id: number, dto: UpdatePlaylistDto, clerkId: string): Promise<Playlist> {
-    await this.findOne(id, clerkId); // ensures ownership
+    await this.findOne(id, clerkId); // verifies ownership
+  
+    // First, delete existing items and screenLinks
+    await this.prisma.playlistItem.deleteMany({ where: { playlistId: id } });
+    await this.prisma.playlistOnScreen.deleteMany({ where: { playlistId: id } });
+  
+    // Then update the playlist and re-create the relations
     return this.prisma.playlist.update({
       where: { id },
       data: {
         name: dto.name,
         description: dto.description,
-        items: {
-          deleteMany: dto.items?.map(item => ({ id: item.id })),
-          create: dto.items?.map(item => ({
-            playlistId: id,
-            mediaId: item.mediaId,
-            position: item.position,
-            durationOverride: item.durationOverride,
-            transitionEffect: item.transitionEffect,
-          })),
-        },
-        screenLinks: {
-          deleteMany: dto.screenLinks?.map(link => ({ id: link.id })),
-          create: dto.screenLinks?.map(link => ({
-            screenId: link.screenId,
-            startTime: link.startTime,
-            endTime: link.endTime,
-            daysOfWeek: link.daysOfWeek,
-            repeatDaily: link.repeatDaily,
-            priority: link.priority,
-          })),
-        },
+        items: dto.items ? {
+          create: dto.items.map((mediaId, index) => ({
+            mediaId,
+            position: index,
+            durationOverride: null,
+            transitionEffect: null,
+          }))
+        } : undefined,
+        screenLinks: dto.screenLinks ? {
+          create: dto.screenLinks.map((screenId, index) => ({
+            screenId,
+            assignedAt: new Date(),
+            startTime: null,
+            endTime: null,
+            daysOfWeek: null,
+            repeatDaily: false,
+            priority: index,
+          }))
+        } : undefined,
+      },
+      include: {
+        items: true,
+        screenLinks: true,
       },
     });
   }
-
+  
   async remove(id: number, clerkId: string): Promise<Playlist> {
     await this.findOne(id, clerkId); // ensures ownership
     return this.prisma.playlist.delete({

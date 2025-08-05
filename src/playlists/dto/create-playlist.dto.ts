@@ -1,5 +1,5 @@
-import { PlaylistItem, PlaylistOnScreen } from '@prisma/client';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreatePlaylistDto {
   @IsString()
@@ -8,7 +8,16 @@ export class CreatePlaylistDto {
   @IsOptional()
   @IsString()
   description?: string;
-  items?: PlaylistItem[];
-  screenLinks?: PlaylistOnScreen[];
 
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Type(() => Number)
+  items?: number[]; // this is now an array of foreign keys (IDs)
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Type(() => Number)
+  screenLinks?: number[]; // assuming same for screenLinks
 }

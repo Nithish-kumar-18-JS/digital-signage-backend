@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, Put } from '@nestjs/common';
 import { PlaylistsService } from './playlists.service';
 import { Playlist } from '@prisma/client';
 import { AuthGuard } from '../auth/auth.guard';
@@ -22,19 +22,19 @@ export class PlaylistsController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('/:id')
+  @Get('/get-playlist/:id')
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.playlistsService.findOne(+id, req.user.sub);
   }
 
   @UseGuards(AuthGuard)
-  @Patch('/:id')
+  @Put('/update-playlist/:id')
   update(@Param('id') id: string, @Body() updatePlaylistDto: UpdatePlaylistDto, @Req() req: any) {
     return this.playlistsService.update(+id, updatePlaylistDto, req.user.sub);
   }
 
   @UseGuards(AuthGuard)
-  @Delete('/:id')
+  @Delete('/delete-playlist/:id')
   remove(@Param('id') id: string, @Req() req: any) {
     return this.playlistsService.remove(+id, req.user.sub);
   }
