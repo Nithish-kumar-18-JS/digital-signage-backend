@@ -1,5 +1,6 @@
-import { IsEnum, IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsDateString, IsArray, IsNumber, IsInt } from 'class-validator';
 import { ScreenOrientation, ScreenStatus } from '@prisma/client';
+import { Type } from 'class-transformer';
 
 export class CreateScreenDto {
   @IsString()
@@ -24,4 +25,14 @@ export class CreateScreenDto {
   @IsOptional()
   @IsDateString()
   lastSeen?: string;
+
+  @IsOptional()
+  @IsArray()
+  @Type(() => Number)
+  @IsNumber()
+  playlistLinks?: number[];
+
+  @IsOptional()
+  @IsInt()
+  createdBy?: number;
 }

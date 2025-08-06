@@ -31,16 +31,20 @@ export class ScheduleController {
     if (!clerkId) throw new BadRequestException('Unauthorized');
     
     // 🔍 Optionally validate ownership of screenId/playlistId in service
-    return this.scheduleService.create(createScheduleDto);
+    return this.scheduleService.create(createScheduleDto, clerkId);
   }
 
   @Get()
-  findAll() {
-    return this.scheduleService.findAll();
+  findAll(@Req() req: AuthRequest) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
+    return this.scheduleService.findAll(clerkId);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: AuthRequest) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
     return this.scheduleService.findOne(id);
   }
 
@@ -48,21 +52,12 @@ export class ScheduleController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateScheduleDto: UpdateScheduleDto,
-    @Req() req: AuthRequest
   ) {
-    const clerkId = req?.user?.sub;
-    if (!clerkId) throw new BadRequestException('Unauthorized');
-
-    // 🔐 Optionally check that this user can update this schedule
     return this.scheduleService.update(id, updateScheduleDto);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number, @Req() req: AuthRequest) {
-    const clerkId = req?.user?.sub;
-    if (!clerkId) throw new BadRequestException('Unauthorized');
-
-    // 🔐 Same note here — pass `clerkId` to enforce permissions if needed
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.scheduleService.remove(id);
   }
 }

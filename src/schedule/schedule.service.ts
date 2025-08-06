@@ -7,15 +7,25 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 export class ScheduleService {
   constructor(private prisma: PrismaService) {}
 
-  create(data: CreateScheduleDto) {
-    return this.prisma.playlistOnScreen.create({ data });
+  async create(data: CreateScheduleDto, clerkId: string) {
+    const userId = await this.getUserId(clerkId);
+    let scheduleData = {
+      ...data,
+      playlists: data.playlists ? {
+        create: data.playlists.map((playlistId) => ({ playlistId })),
+      } : undefined,
+      createdBy: userId,
+    };
+    return this.prisma.playlistOnScreen.create({ data: scheduleData });
   }
 
-  findAll() {
+  async findAll(clerkId: string) {
+    const userId = await this.getUserId(clerkId);
     return this.prisma.playlistOnScreen.findMany({
+      where: { createdBy: userId },
       include: {
         screen: true,
-        playlist: true,
+        playlists: true,
       },
     });
   }
@@ -25,7 +35,7 @@ export class ScheduleService {
       where: { id },
       include: {
         screen: true,
-        playlist: true,
+        playlists: true,
       },
     });
   }
@@ -33,12 +43,18 @@ export class ScheduleService {
   async update(id: number, data: UpdateScheduleDto) {
     const existing = await this.prisma.playlistOnScreen.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Schedule not found');
-    return this.prisma.playlistOnScreen.update({ where: { id }, data });
+    return this.prisma.playlistOnScreen.update({ where: { id }, data: { ...data, playlists: data.playlists ? { create: data.playlists.map((playlistId) => ({ playlistId })) } : undefined } });
   }
 
   async remove(id: number) {
     const existing = await this.prisma.playlistOnScreen.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Schedule not found');
     return this.prisma.playlistOnScreen.delete({ where: { id } });
+  }
+
+  private async getUserId(clerkId: string): Promise<number> {
+    const user = await this.prisma.user.findUnique({ where: { clerkId } });
+    if (!user) throw new NotFoundException('User not found');
+    return user.id;
   }
 }

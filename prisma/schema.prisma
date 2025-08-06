@@ -34,43 +34,42 @@ enum ScreenOrientation {
 }
 
 model User {
-  id          Int        @id @default(autoincrement())
-  clerkId     String     @unique
-  email       String     @unique
-  firstName   String?
-  lastName    String?
-  role        UserRole   @default(VIEWER)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime?  @updatedAt
+  id               Int        @id @default(autoincrement())
+  clerkId          String     @unique
+  email            String     @unique
+  firstName        String?
+  lastName         String?
+  role             UserRole   @default(VIEWER)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime?  @updatedAt
   uploadedMedia    Media[]
   createdPlaylists Playlist[]
 }
 
-
 model Media {
-  id              Int     @id @default(autoincrement())
+  id              Int            @id @default(autoincrement())
   name            String
   type            MediaType
   url             String
-  durationSeconds Int        @default(10)
-  uploadedById    Int        // 🔄 Changed from String → Int
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  uploadedBy      User       @relation(fields: [uploadedById], references: [id])
+  durationSeconds Int            @default(10)
+  uploadedById    Int // 🔄 Changed from String → Int
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  uploadedBy      User           @relation(fields: [uploadedById], references: [id])
   playlistItems   PlaylistItem[]
 }
 
 model Playlist {
-  id            Int              @id @default(autoincrement())
-  name          String
-  description   String?
-  createdById   Int                 // 🔄 Changed from String → Int
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdById Int // 🔄 Changed from String → Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  createdBy     User                @relation(fields: [createdById], references: [id])
-  items         PlaylistItem[]
-  screenLinks   PlaylistOnScreen[]
+  createdBy                 User                       @relation(fields: [createdById], references: [id])
+  items                     PlaylistItem[]
+  playlistOnScreenPlaylists PlaylistOnScreenPlaylist[]
 }
 
 model PlaylistItem {
@@ -81,13 +80,12 @@ model PlaylistItem {
   durationOverride Int?
   transitionEffect String?
 
-  playlist         Playlist   @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  media            Media      @relation(fields: [mediaId], references: [id])
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  media    Media    @relation(fields: [mediaId], references: [id])
 }
 
-
 model Setting {
-  id        Int   @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   screenId  Int
   key       String
   value     String
@@ -95,36 +93,44 @@ model Setting {
   screen    Screen   @relation(fields: [screenId], references: [id])
 }
 
-
 model Screen {
-  id              Int              @id @default(autoincrement())
-  name            String
-  location        String?
-  status          ScreenStatus        @default(OFFLINE)
-  lastSeen        DateTime?
-  resolution      String?
-  orientation     ScreenOrientation   @default(LANDSCAPE)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-
-  playlistLinks   PlaylistOnScreen[]
-  settings        Setting[]
+  id            Int                @id @default(autoincrement())
+  name          String
+  location      String?
+  status        ScreenStatus       @default(OFFLINE)
+  lastSeen      DateTime?
+  resolution    String?
+  orientation   ScreenOrientation  @default(LANDSCAPE)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  createdBy     Int
+  playlistLinks PlaylistOnScreen[]
+  settings      Setting[]
 }
 
 model PlaylistOnScreen {
-  id           Int   @id @default(autoincrement())
-  playlistId   Int
-  screenId     Int
-  assignedAt   DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  screenId   Int
+  assignedAt DateTime @default(now())
 
-  startTime    DateTime?
-  endTime      DateTime?
-  daysOfWeek   String?
-  repeatDaily  Boolean    @default(true)
-  priority     Int        @default(0)
+  startTime   DateTime?
+  endTime     DateTime?
+  daysOfWeek  String?
+  repeatDaily Boolean   @default(true)
+  priority    Int       @default(0)
 
-  playlist     Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  screen       Screen   @relation(fields: [screenId], references: [id])
+  playlists PlaylistOnScreenPlaylist[]
+  screen    Screen                     @relation(fields: [screenId], references: [id])
+  createdBy Int
 
   @@index([screenId, startTime, endTime])
+}
+
+model PlaylistOnScreenPlaylist {
+  id                 Int @id @default(autoincrement())
+  playlistOnScreenId Int
+  playlistId         Int
+
+  playlistOnScreen PlaylistOnScreen @relation(fields: [playlistOnScreenId], references: [id], onDelete: Cascade)
+  playlist         Playlist         @relation(fields: [playlistId], references: [id], onDelete: Cascade)
 }

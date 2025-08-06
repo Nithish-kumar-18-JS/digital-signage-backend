@@ -29,8 +29,10 @@ export class ScreensController {
   }
 
   @Get()
-  findAll() {
-    return this.screensService.findAll();
+  findAll(@Req() req: AuthRequest) {
+    const clerkId = req?.user?.sub;
+    if (!clerkId) throw new BadRequestException('Unauthorized');
+    return this.screensService.findAll(clerkId);
   }
 
   @Get(':id')
