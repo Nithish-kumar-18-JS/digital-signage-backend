@@ -17,7 +17,8 @@ export class PlaylistsService {
   async create(dto: CreatePlaylistDto, clerkId: string): Promise<Playlist> {
     const userId = await this.getUserId(clerkId);
   
-    return this.prisma.playlist.create({
+    // Step 1: Create the playlist and its items
+    const playlist = await this.prisma.playlist.create({
       data: {
         name: dto.name,
         description: dto.description,
@@ -30,23 +31,40 @@ export class PlaylistsService {
             transitionEffect: null
           }))
         } : undefined,
-        screenLinks: dto.screenLinks ? {
-          create: dto.screenLinks.map((screenId, index) => ({
+      },
+      include: {
+        items: true,
+        playlistOnScreenPlaylists: true,
+      },
+    });
+
+    // Step 2: Link playlist to screens if provided
+    if (dto.screenLinks && dto.screenLinks.length > 0) {
+      for (let i = 0; i < dto.screenLinks.length; i++) {
+        const screenId = dto.screenLinks[i];
+        // Create PlaylistOnScreen
+        const playlistOnScreen = await this.prisma.playlistOnScreen.create({
+          data: {
             screenId,
             assignedAt: new Date(),
             startTime: null,
             endTime: null,
             daysOfWeek: null,
             repeatDaily: false,
-            priority: index
-          }))
-        } : undefined,
-      },
-      include: {
-        items: true,
-        screenLinks: true,
-      },
-    });
+            priority: i,
+            createdBy: userId,
+          },
+        });
+        // Create PlaylistOnScreenPlaylist
+        await this.prisma.playlistOnScreenPlaylist.create({
+          data: {
+            playlistId: playlist.id,
+            playlistOnScreenId: playlistOnScreen.id,
+          },
+        });
+      }
+    }
+    return playlist;
   }
 
   async findAll(clerkId: string): Promise<Playlist[]> {
@@ -70,10 +88,10 @@ export class PlaylistsService {
   
     // First, delete existing items and screenLinks
     await this.prisma.playlistItem.deleteMany({ where: { playlistId: id } });
-    await this.prisma.playlistOnScreen.deleteMany({ where: { playlistId: id } });
+    await this.prisma.playlistOnScreenPlaylist.deleteMany({ where: { playlistId: id } });
   
     // Then update the playlist and re-create the relations
-    return this.prisma.playlist.update({
+    const playlist = await this.prisma.playlist.update({
       where: { id },
       data: {
         name: dto.name,
@@ -86,23 +104,39 @@ export class PlaylistsService {
             transitionEffect: null,
           }))
         } : undefined,
-        screenLinks: dto.screenLinks ? {
-          create: dto.screenLinks.map((screenId, index) => ({
+      },
+      include: {
+        items: true,
+        playlistOnScreenPlaylists: true,
+      },
+    });
+
+    // If screenLinks provided, create PlaylistOnScreen and PlaylistOnScreenPlaylist records
+    if (dto.screenLinks && dto.screenLinks.length > 0) {
+      const userId = await this.getUserId(clerkId);
+      for (let i = 0; i < dto.screenLinks.length; i++) {
+        const screenId = dto.screenLinks[i];
+        const playlistOnScreen = await this.prisma.playlistOnScreen.create({
+          data: {
             screenId,
             assignedAt: new Date(),
             startTime: null,
             endTime: null,
             daysOfWeek: null,
             repeatDaily: false,
-            priority: index,
-          }))
-        } : undefined,
-      },
-      include: {
-        items: true,
-        screenLinks: true,
-      },
-    });
+            priority: i,
+            createdBy: userId,
+          },
+        });
+        await this.prisma.playlistOnScreenPlaylist.create({
+          data: {
+            playlistId: playlist.id,
+            playlistOnScreenId: playlistOnScreen.id,
+          },
+        });
+      }
+    }
+    return playlist;
   }
   
   async remove(id: number, clerkId: string): Promise<Playlist> {
