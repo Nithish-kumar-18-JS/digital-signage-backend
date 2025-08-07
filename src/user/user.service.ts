@@ -6,32 +6,35 @@ import clerkClient from '@clerk/clerk-sdk-node';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async findOrCreateUser(clerkUser: string) {
-    const clerkId = clerkUser;
-
-    if (!clerkId) {
-      throw new Error('Missing Clerk user ID');
-    }
-
-    const existing = await this.prisma.user.findUnique({
+  async findOne(email: string) {
+    return this.prisma.user.findUnique({
       where: {
-        clerkId: clerkId,
+        email,
       },
     });
+  }
 
-    if (existing) return existing;
+  async findUser(id: number) {
+    return this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
 
-    const user = await clerkClient.users.getUser(clerkUser);
-
-    const created = await this.prisma.user.create({
+  async create(data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+  }) {
+    return this.prisma.user.create({
       data: {
-        clerkId,
-        email: user.emailAddresses[0].emailAddress,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        password: data.password,
       },
     });
-
-    return created;
   }
 }

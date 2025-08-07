@@ -76,6 +76,16 @@ $ npx prisma db push
 $ npm run start:dev
 ```
 
+<!-- docker running commands -->
+
+sudo docker ps
+
+sudo docker build -t digital-signage-backend .
+
+sudo docker logs digital-signage-app
+
+sudo docker run --name digital-signage-app -p 3000:3000 -d digital-signage-backend
+
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
 ## Resources

@@ -1,0 +1,210 @@
+{
+    "info": {
+      "name": "Digital Signage API",
+      "description": "Test collection for all digital signage endpoints.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      { "key": "baseUrl", "value": "http://localhost:3000" }
+    ],
+    "item": [
+      {
+        "name": "Users",
+        "item": [
+          {
+            "name": "List Users",
+            "request": { "method": "GET", "url": "{{baseUrl}}/users" }
+          },
+          {
+            "name": "Get User By ID",
+            "request": { "method": "GET", "url": "{{baseUrl}}/users/1" }
+          },
+          {
+            "name": "Create User",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/users",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"clerkId\": \"clerk-123\",\n  \"email\": \"test@example.com\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"role\": \"VIEWER\"\n}" }
+            }
+          },
+          {
+            "name": "Update User",
+            "request": {
+              "method": "PATCH",
+              "url": "{{baseUrl}}/users/1",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Changed\"\n}" }
+            }
+          },
+          {
+            "name": "Delete User",
+            "request": { "method": "DELETE", "url": "{{baseUrl}}/users/1" }
+          }
+        ]
+      },
+      {
+        "name": "Media",
+        "item": [
+          {
+            "name": "List Media",
+            "request": { "method": "GET", "url": "{{baseUrl}}/media" }
+          },
+          {
+            "name": "Get Media by ID",
+            "request": { "method": "GET", "url": "{{baseUrl}}/media/1" }
+          },
+          {
+            "name": "Create Media",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/media",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"name\": \"Sample Image\",\n  \"type\": \"IMAGE\",\n  \"url\": \"https://via.placeholder.com/640x480.png\",\n  \"durationSeconds\": 10\n}" }
+            }
+          },
+          {
+            "name": "Update Media",
+            "request": {
+              "method": "PATCH",
+              "url": "{{baseUrl}}/media/1",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Media Name\"\n}" }
+            }
+          },
+          {
+            "name": "Delete Media",
+            "request": { "method": "DELETE", "url": "{{baseUrl}}/media/1" }
+          }
+        ]
+      },
+      {
+        "name": "Playlists",
+        "item": [
+          {
+            "name": "List Playlists",
+            "request": { "method": "GET", "url": "{{baseUrl}}/playlists" }
+          },
+          {
+            "name": "Get Playlist by ID",
+            "request": { "method": "GET", "url": "{{baseUrl}}/playlists/1" }
+          },
+          {
+            "name": "Create Playlist",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/playlists",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"name\": \"Morning Show\",\n  \"description\": \"Screens for the morning\",\n  \"createdById\": 1\n}" }
+            }
+          },
+          {
+            "name": "Update Playlist",
+            "request": {
+              "method": "PATCH",
+              "url": "{{baseUrl}}/playlists/1",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated Description\"\n}" }
+            }
+          },
+          {
+            "name": "Delete Playlist",
+            "request": { "method": "DELETE", "url": "{{baseUrl}}/playlists/1" }
+          }
+        ]
+      },
+      {
+        "name": "Screens",
+        "item": [
+          {
+            "name": "List Screens",
+            "request": { "method": "GET", "url": "{{baseUrl}}/screens" }
+          },
+          {
+            "name": "Get Screen by ID",
+            "request": { "method": "GET", "url": "{{baseUrl}}/screens/1" }
+          },
+          {
+            "name": "Create Screen",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/screens",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"name\": \"Lobby Screen\",\n  \"deviceId\": \"abcd1234\",\n  \"resolution\": \"1920x1080\",\n  \"createdBy\": 1\n}" }
+            }
+          },
+          {
+            "name": "Update Screen",
+            "request": {
+              "method": "PATCH",
+              "url": "{{baseUrl}}/screens/1",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Lobby Screen\"\n}" }
+            }
+          },
+          {
+            "name": "Delete Screen",
+            "request": { "method": "DELETE", "url": "{{baseUrl}}/screens/1" }
+          }
+        ]
+      },
+      {
+        "name": "Schedules",
+        "item": [
+          {
+            "name": "List Schedules",
+            "request": { "method": "GET", "url": "{{baseUrl}}/schedules" }
+          },
+          {
+            "name": "Get Schedule by ID",
+            "request": { "method": "GET", "url": "{{baseUrl}}/schedules/1" }
+          },
+          {
+            "name": "Create Schedule",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/schedules",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"screenId\": 1,\n  \"assignedAt\": \"2024-07-01T09:00:00.000Z\",\n  \"repeatDaily\": true\n}" }
+            }
+          },
+          {
+            "name": "Update Schedule",
+            "request": {
+              "method": "PATCH",
+              "url": "{{baseUrl}}/schedules/1",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"priority\": 5\n}" }
+            }
+          },
+          {
+            "name": "Delete Schedule",
+            "request": { "method": "DELETE", "url": "{{baseUrl}}/schedules/1" }
+          }
+        ]
+      },
+      {
+        "name": "Schedule <-> Playlists",
+        "item": [
+          {
+            "name": "Assign Playlist to Schedule",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/schedules/1/playlists",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": { "mode": "raw", "raw": "{\n  \"playlistId\": 1\n}" }
+            }
+          },
+          {
+            "name": "Remove Playlist from Schedule",
+            "request": { "method": "DELETE", "url": "{{baseUrl}}/schedules/1/playlists/1" }
+          },
+          {
+            "name": "List Playlists for Schedule",
+            "request": { "method": "GET", "url": "{{baseUrl}}/schedules/1/playlists" }
+          }
+        ]
+      }
+    ]
+  }
+  

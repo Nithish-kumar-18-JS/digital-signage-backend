@@ -14,16 +14,20 @@ import { ScreensModule } from './screens/screens.module';
 import { ScreensService } from './screens/screens.service';
 import { ScheduleService } from './schedule/schedule.service';
 import { PlaylistsService } from './playlists/playlists.service';
+import { HelperModule } from './lib/helper.module';
+import { AuthService } from './auth/auth.service';
+import { AuthController } from './auth/auth.controller';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    HelperModule,
     PlaylistsModule,
     ScheduleModule,
     ScreensModule,
   ],
-  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService],
-  controllers: [UserController, MediaController, UploadController],
+  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService,AuthService],
+  controllers: [UserController, MediaController, UploadController,AuthController],
 })
 export class AppModule {}

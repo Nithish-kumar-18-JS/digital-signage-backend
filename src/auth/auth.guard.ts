@@ -1,28 +1,25 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { ClerkService } from '../clerk/clerk.service';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { AuthService } from './auth.service';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(private clerkService: ClerkService) {}
+export class TokenAuthGuard implements CanActivate {
+  constructor(private authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.replace('Bearer ', '');
-
-    if (!token) throw new UnauthorizedException('Token required');
-
+    const req = context.switchToHttp().getRequest();
+    const authHeader = req.headers['authorization'];
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw new UnauthorizedException();
+    }
+    const token = authHeader.slice(7);
     try {
-      const user = await this.clerkService.verifyToken(token);
-      request.user = user;
+      const { userId, newToken } = await this.authService.validateAndRefresh(token);
+      req.user = { id: userId };
+      // Optionally set new token in response header
+      context.switchToHttp().getResponse().setHeader('x-auth-token', newToken);
       return true;
-    } catch (error) {
-      console.error('Authentication error:', error);
-      throw new UnauthorizedException('Invalid or expired token');
+    } catch (e) {
+      throw new UnauthorizedException();
     }
   }
 }

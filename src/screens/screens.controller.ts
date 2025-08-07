@@ -1,56 +1,29 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Req,
-  BadRequestException,
-} from '@nestjs/common';
-import { ScreensService } from './screens.service';
-import { CreateScreenDto } from './dto/create-screen.dto';
-import { UpdateScreenDto } from './dto/update-screen.dto';
-import { AuthGuard } from '../auth/auth.guard';
-import { AuthRequest } from 'src/types/auth-request';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { ScreensService } from '../screens/screens.service';
+import { TokenAuthGuard } from 'src/auth/auth.guard';
 
 @Controller('screens')
-@UseGuards(AuthGuard)
+@UseGuards(TokenAuthGuard)
 export class ScreensController {
   constructor(private readonly screensService: ScreensService) {}
 
-  @Post()
-  create(@Body() createScreenDto: CreateScreenDto, @Req() req: AuthRequest) {
-    const clerkId = req?.user?.sub;
-    if (!clerkId) throw new BadRequestException('Unauthorized');
-    return this.screensService.create(createScreenDto, clerkId);
-  }
-
   @Get()
-  findAll(@Req() req: AuthRequest) {
-    const clerkId = req?.user?.sub;
-    if (!clerkId) throw new BadRequestException('Unauthorized');
-    return this.screensService.findAll(clerkId);
+  async findAll(@Req() req) {
+    return this.screensService.findAll(req.user.userId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.screensService.findOne(+id);
+    return this.screensService.findOne(Number(id));
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateScreenDto: UpdateScreenDto, @Req() req: AuthRequest) {
-    const clerkId = req?.user?.sub;
-    if (!clerkId) throw new BadRequestException('Unauthorized');
-    return this.screensService.update(+id, updateScreenDto, clerkId);
+  @Post()
+  async create(@Body() data: any, @Req() req) {
+    return this.screensService.create(data, req.user.userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req: AuthRequest) {
-    const clerkId = req?.user?.sub;
-    if (!clerkId) throw new BadRequestException('Unauthorized');
-    return this.screensService.remove(+id, clerkId);
+  remove(@Param('id') id: string) {
+    return this.screensService.remove(Number(id));
   }
 }

@@ -1,60 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
-import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class ScheduleService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: CreateScheduleDto, clerkId: string) {
-    const userId = await this.getUserId(clerkId);
-    let scheduleData = {
-      ...data,
-      playlists: data.playlists ? {
-        create: data.playlists.map((playlistId) => ({ playlistId })),
-      } : undefined,
-      createdBy: userId,
-    };
-    return this.prisma.playlistOnScreen.create({ data: scheduleData });
-  }
-
-  async findAll(clerkId: string) {
-    const userId = await this.getUserId(clerkId);
-    return this.prisma.playlistOnScreen.findMany({
-      where: { createdBy: userId },
-      include: {
-        screen: true,
-        playlists: true,
-      },
-    });
+  findAll(userId: number) {
+    return this.prisma.schedule.findMany({ where: { createdById: userId }, include: { schedulePlaylists: true, screen: true } });
   }
 
   findOne(id: number) {
-    return this.prisma.playlistOnScreen.findUnique({
-      where: { id },
-      include: {
-        screen: true,
-        playlists: true,
-      },
-    });
+    return this.prisma.schedule.findUnique({ where: { id }, include: { schedulePlaylists: true, screen: true } });
   }
 
-  async update(id: number, data: UpdateScheduleDto) {
-    const existing = await this.prisma.playlistOnScreen.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException('Schedule not found');
-    return this.prisma.playlistOnScreen.update({ where: { id }, data: { ...data, playlists: data.playlists ? { create: data.playlists.map((playlistId) => ({ playlistId })) } : undefined } });
+  create(data: any, userId: number) {
+    const scheduleData = {
+      ...data,
+      createdById: userId,
+    }
+    return this.prisma.schedule.create({ data: scheduleData });
   }
 
-  async remove(id: number) {
-    const existing = await this.prisma.playlistOnScreen.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException('Schedule not found');
-    return this.prisma.playlistOnScreen.delete({ where: { id } });
-  }
-
-  private async getUserId(clerkId: string): Promise<number> {
-    const user = await this.prisma.user.findUnique({ where: { clerkId } });
-    if (!user) throw new NotFoundException('User not found');
-    return user.id;
+  remove(id: number) {
+    return this.prisma.schedule.delete({ where: { id } });
   }
 }

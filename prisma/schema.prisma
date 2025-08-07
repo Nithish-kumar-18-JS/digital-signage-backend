@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN
-  EDITOR
-  VIEWER
-}
-
 enum MediaType {
   IMAGE
   VIDEO
@@ -34,16 +28,26 @@ enum ScreenOrientation {
 }
 
 model User {
-  id               Int        @id @default(autoincrement())
-  clerkId          String     @unique
-  email            String     @unique
+  id               Int         @id @default(autoincrement())
+  email            String      @unique
   firstName        String?
   lastName         String?
-  role             UserRole   @default(VIEWER)
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime?  @updatedAt
+  password         String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
   uploadedMedia    Media[]
   createdPlaylists Playlist[]
+  createdSchedules Schedule[]
+  authTokens       AuthToken[] @relation("UserAuthTokens")
+}
+
+model AuthToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation("UserAuthTokens", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Media {
@@ -52,7 +56,7 @@ model Media {
   type            MediaType
   url             String
   durationSeconds Int            @default(10)
-  uploadedById    Int // 🔄 Changed from String → Int
+  uploadedById    Int
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   uploadedBy      User           @relation(fields: [uploadedById], references: [id])
@@ -63,13 +67,13 @@ model Playlist {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
-  createdById Int // 🔄 Changed from String → Int
+  createdById Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  createdBy                 User                       @relation(fields: [createdById], references: [id])
-  items                     PlaylistItem[]
-  playlistOnScreenPlaylists PlaylistOnScreenPlaylist[]
+  createdBy         User               @relation(fields: [createdById], references: [id])
+  items             PlaylistItem[]
+  schedulePlaylists SchedulePlaylist[]
 }
 
 model PlaylistItem {
@@ -94,43 +98,43 @@ model Setting {
 }
 
 model Screen {
-  id            Int                @id @default(autoincrement())
-  name          String
-  location      String?
-  status        ScreenStatus       @default(OFFLINE)
-  lastSeen      DateTime?
-  resolution    String?
-  orientation   ScreenOrientation  @default(LANDSCAPE)
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  createdBy     Int
-  playlistLinks PlaylistOnScreen[]
-  settings      Setting[]
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String?
+  deviceId    String            @unique
+  status      ScreenStatus      @default(OFFLINE)
+  lastSeen    DateTime?
+  resolution  String?
+  orientation ScreenOrientation @default(LANDSCAPE)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  createdBy   Int
+
+  settings  Setting[]
+  schedules Schedule[] @relation("ScreenToSchedules")
 }
 
-model PlaylistOnScreen {
+model Schedule {
   id         Int      @id @default(autoincrement())
   screenId   Int
   assignedAt DateTime @default(now())
 
-  startTime   DateTime?
-  endTime     DateTime?
-  daysOfWeek  String?
-  repeatDaily Boolean   @default(true)
-  priority    Int       @default(0)
-
-  playlists PlaylistOnScreenPlaylist[]
-  screen    Screen                     @relation(fields: [screenId], references: [id])
-  createdBy Int
-
-  @@index([screenId, startTime, endTime])
+  startTime         DateTime?
+  endTime           DateTime?
+  daysOfWeek        String?
+  repeatDaily       Boolean            @default(true)
+  priority          Int                @default(0)
+  createdById       Int
+  createdBy         User               @relation(fields: [createdById], references: [id])
+  schedulePlaylists SchedulePlaylist[] @relation("ScheduleToItems")
+  screen            Screen             @relation("ScreenToSchedules", fields: [screenId], references: [id])
 }
 
-model PlaylistOnScreenPlaylist {
-  id                 Int @id @default(autoincrement())
-  playlistOnScreenId Int
-  playlistId         Int
+model SchedulePlaylist {
+  id         Int @id @default(autoincrement())
+  scheduleId Int
+  playlistId Int
 
-  playlistOnScreen PlaylistOnScreen @relation(fields: [playlistOnScreenId], references: [id], onDelete: Cascade)
-  playlist         Playlist         @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  schedule Schedule @relation("ScheduleToItems", fields: [scheduleId], references: [id], onDelete: Cascade)
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
 }

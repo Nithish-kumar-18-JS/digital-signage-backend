@@ -1,111 +1,26 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
-import { CreateScreenDto } from './dto/create-screen.dto';
-import { UpdateScreenDto } from './dto/update-screen.dto';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class ScreensService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async create(createScreenDto: CreateScreenDto, clerkId: string) {
-    const user = await this.verifyUser(clerkId);
-
-    const playlistLinks = createScreenDto.playlistLinks?.length
-      ? {
-          create: createScreenDto.playlistLinks.map((playlistId) => ({
-            playlistId,
-            createdBy: user.id,
-          })),
-        }
-      : undefined;
-
-    return this.prisma.screen.create({
-      data: {
-        ...createScreenDto,
-        createdBy: user.id,
-        playlistLinks,
-      },
-    });
+  constructor(private prisma: PrismaService) {}
+  findAll(userId: number) {
+    return this.prisma.screen.findMany({ where: { createdBy: userId }, include: { schedules: true, settings: true } });
   }
 
-  async findAll(clerkId: string) {
-    const user = await this.verifyUser(clerkId);
-
-    return this.prisma.screen.findMany({
-      where: { createdBy: user.id },
-      include: {
-        playlistLinks: true,
-        settings: true,
-      },
-    });
+  findOne(id: number) {
+    return this.prisma.screen.findUnique({ where: { id }, include: { schedules: true, settings: true } });
   }
 
-  async findOne(id: number) {
-    const screen = await this.prisma.screen.findUnique({
-      where: { id },
-      include: {
-        playlistLinks: true,
-        settings: true,
-      },
-    });
-
-    if (!screen) {
-      throw new NotFoundException(`Screen with ID ${id} not found`);
+  create(data: any, userId  : number) {
+    const screenData = {
+      ...data,
+      createdBy: userId,
     }
-
-    return screen;
+    return this.prisma.screen.create({ data: screenData, include: { schedules: true, settings: true } });
   }
 
-  async update(id: number, updateScreenDto: UpdateScreenDto, clerkId: string) {
-    const user = await this.verifyUser(clerkId);
-    const screen = await this.findOne(id);
-
-    if (screen.createdBy !== user.id) {
-      throw new ForbiddenException('You do not have permission to update this screen');
-    }
-
-    const playlistLinks = updateScreenDto.playlistLinks?.length
-      ? {
-          create: updateScreenDto.playlistLinks.map((playlistId) => ({
-            playlistId,
-            createdBy: user.id,
-          })),
-        }
-      : undefined;
-
-    return this.prisma.screen.update({
-      where: { id },
-      data: {
-        ...updateScreenDto,
-        playlistLinks,
-      },
-    });
-  }
-
-  async remove(id: number, clerkId: string) {
-    const user = await this.verifyUser(clerkId);
-    const screen = await this.findOne(id);
-
-    if (screen.createdBy !== user.id) {
-      throw new ForbiddenException('You do not have permission to delete this screen');
-    }
-
-    return this.prisma.screen.delete({
-      where: { id },
-    });
-  }
-
-  private async verifyUser(clerkId: string) {
-    const user = await this.prisma.user.findUnique({ where: { clerkId } });
-
-    if (!user) {
-      throw new ForbiddenException(`User with clerkId ${clerkId} not found`);
-    }
-
-    return user;
+  remove(id: number) {
+    return this.prisma.screen.delete({ where: { id }, include: { schedules: true, settings: true } });
   }
 }
