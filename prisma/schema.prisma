@@ -50,18 +50,19 @@ model AuthToken {
   user      User     @relation("UserAuthTokens", fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Media {
-  id              Int            @id @default(autoincrement())
-  name            String
-  type            MediaType
-  url             String
-  durationSeconds Int            @default(10)
-  uploadedById    Int
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  uploadedBy      User           @relation(fields: [uploadedById], references: [id])
-  playlistItems   PlaylistItem[]
-}
+  model Media {
+    id              Int            @id @default(autoincrement())
+    name            String
+    description     String?
+    type            MediaType
+    url             String?
+    durationSeconds Int?            @default(0)
+    uploadedById    Int
+    createdAt       DateTime       @default(now())
+    updatedAt       DateTime       @updatedAt
+    uploadedBy      User           @relation(fields: [uploadedById], references: [id])
+    playlistItems   PlaylistItem[]
+  }
 
 model Playlist {
   id          Int      @id @default(autoincrement())
