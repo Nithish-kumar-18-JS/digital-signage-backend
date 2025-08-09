@@ -13,10 +13,15 @@ export class AuthService {
   async login(userId: number): Promise<string> {
     const tokenValue = randomBytes(48).toString('hex');
     const expiresAt = addDays(new Date(), this.TOKEN_EXPIRY_DAYS);
-    await this.prisma.authToken.create({
-      data: { token: tokenValue, userId, expiresAt }
+    // findOneCreate if not exists
+    // Upsert = update if exists, create if not
+    await this.prisma.authToken.upsert({
+      where: { id: userId }, // must be unique in your schema
+      update: { token: tokenValue, expiresAt },
+      create: { token: tokenValue, userId, expiresAt },
     });
-    return tokenValue;
+
+  return tokenValue;
   }
 
   // Validate and refresh token
