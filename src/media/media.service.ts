@@ -6,21 +6,45 @@ export class MediaService {
   constructor(private prisma: PrismaService) {}
 
   findAll(userId: number) {
-    return this.prisma.media.findMany({ where: { uploadedById: userId }, include: { playlistItems: true } });
+    try {
+      return this.prisma.media.findMany({ where: { uploadedById: userId }, include: { playlistItems: true } });
+    } catch (error) {
+      throw error;
+    }
   }
   findOne(id: number) {
-    return this.prisma.media.findUnique({ where: { id }, include: { playlistItems: true } });
+    try {
+      return this.prisma.media.findUnique({ where: { id }, include: { playlistItems: true } });
+    } catch (error) {
+      throw error;
+    }
   }
 
   create(data: any, userId: number) {
-    const mediaData = {
-      ...data,
-      uploadedBy: { id: userId },
+    try {
+      const mediaData = {
+        ...data,
+        uploadedById: userId,
+      }
+      return this.prisma.media.create({ data: mediaData });
+    } catch (error) {
+      throw error;
     }
-    return this.prisma.media.create({ data: mediaData });
+  }
+
+  update(id: number, data: any) {
+    try {
+      return this.prisma.media.update({ where: { id }, data });
+    } catch (error) {
+      throw error;
+    }
   }
 
   remove(id: number) {
-    return this.prisma.media.delete({ where: { id } });
+    try {
+      return this.prisma.media.delete({ where: { id } });
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -39,6 +39,21 @@ model User {
   createdPlaylists Playlist[]
   createdSchedules Schedule[]
   authTokens       AuthToken[] @relation("UserAuthTokens")
+  auditLogs        auditLog[] @relation("UserAuditLogs")
+}
+
+model auditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  action    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  request   String
+  response  String
+  error     String?
+  status    Int
+  lineNumber Int?
+  user      User     @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: Cascade) 
 }
 
 model AuthToken {

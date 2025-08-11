@@ -1,6 +1,8 @@
 // main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { AuditInterceptor } from './common/logger/audit-interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +17,9 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api');
+  app.useGlobalInterceptors(app.get(AuditInterceptor));
+  app.useGlobalFilters(new HttpExceptionFilter());
+  // enable global logging and store logging
 
   console.log('Listening on port 3000');
   await app.listen(3000);

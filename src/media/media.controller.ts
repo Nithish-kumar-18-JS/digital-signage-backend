@@ -1,16 +1,15 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req, Put } from '@nestjs/common';
 import { MediaService } from '../media/media.service';
 import { TokenAuthGuard } from 'src/auth/auth.guard';
-import { HelperService } from 'src/lib/helper';
 
 @Controller('media')
 @UseGuards(TokenAuthGuard)
 export class MediaController {
-  constructor(private readonly mediaService: MediaService, private readonly helperService: HelperService) {}
+  constructor(private readonly mediaService: MediaService) {}
 
   @Get()
   async findAll(@Req() req) {
-    return this.mediaService.findAll(req.user.userId);
+    return this.mediaService.findAll(req.user.id);
   }
 
   @Get(':id')
@@ -20,7 +19,12 @@ export class MediaController {
 
   @Post()
   async create(@Body() data: any, @Req() req) {
-    return this.mediaService.create(data, req.user.userId);
+    return this.mediaService.create(data, req.user.id);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() data: any) {
+    return this.mediaService.update(Number(id), data);
   }
 
   @Delete(':id')

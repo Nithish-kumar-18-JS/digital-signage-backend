@@ -30,17 +30,12 @@ export class AuthService {
     if (!record || isBefore(record.expiresAt, new Date())) {
       throw new UnauthorizedException('Token expired.');
     }
-
-    // Rotate: issue a new token, delete the old
-    const newTokenValue = randomBytes(48).toString('hex');
-    const newExpiresAt = addDays(new Date(), this.TOKEN_EXPIRY_DAYS);
-    await this.prisma.$transaction([
-      this.prisma.authToken.delete({ where: { token } }),
-      this.prisma.authToken.create({
-        data: { token: newTokenValue, userId: record.userId, expiresAt: newExpiresAt }
-      }),
-    ]);
-    return { userId: record.userId, newToken: newTokenValue };
+    
+    if(record.expiresAt < new Date()){
+      await this.prisma.authToken.delete({ where: { token } });
+      return { userId: record.userId, newToken: "" };
+    }
+    return { userId: record.userId, newToken: token };
   }
 
   // Logout

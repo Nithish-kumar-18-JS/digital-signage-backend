@@ -9,6 +9,7 @@ export class TokenAuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const authHeader = req.headers['authorization'];
     if (!authHeader?.startsWith('Bearer ')) {
+      console.log('No token provided');
       throw new UnauthorizedException();
     }
     const token = authHeader.slice(7);
@@ -19,6 +20,7 @@ export class TokenAuthGuard implements CanActivate {
       context.switchToHttp().getResponse().setHeader('x-auth-token', newToken);
       return true;
     } catch (e) {
+      console.log(e);
       throw new UnauthorizedException();
     }
   }

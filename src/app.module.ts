@@ -17,6 +17,8 @@ import { PlaylistsService } from './playlists/playlists.service';
 import { HelperModule } from './lib/helper.module';
 import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
+import { CustomLogger } from './common/logger/custom-logger';
+import { AuditInterceptor } from './common/logger/audit-interceptor';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,7 +29,7 @@ import { AuthController } from './auth/auth.controller';
     ScheduleModule,
     ScreensModule,
   ],
-  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService,AuthService],
+  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService,AuthService,CustomLogger,AuditInterceptor],
   controllers: [UserController, MediaController, UploadController,AuthController],
 })
 export class AppModule {}
