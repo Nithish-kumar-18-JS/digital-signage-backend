@@ -47,4 +47,12 @@ export class MediaService {
       throw error;
     }
   }
+
+  search(query: string) {
+    try {
+      return this.prisma.media.findMany({ where: { name: { contains: query, mode: 'insensitive' } } });
+    } catch (error) {
+      throw error;
+    }
+  }
 }

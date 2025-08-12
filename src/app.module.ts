@@ -19,6 +19,7 @@ import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 import { CustomLogger } from './common/logger/custom-logger';
 import { AuditInterceptor } from './common/logger/audit-interceptor';
+import { PoornishaModule } from './poornisha/poornisha.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,6 +29,7 @@ import { AuditInterceptor } from './common/logger/audit-interceptor';
     PlaylistsModule,
     ScheduleModule,
     ScreensModule,
+    PoornishaModule,
   ],
   providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService,AuthService,CustomLogger,AuditInterceptor],
   controllers: [UserController, MediaController, UploadController,AuthController],

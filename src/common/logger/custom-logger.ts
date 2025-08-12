@@ -28,8 +28,8 @@ export class CustomLogger implements LoggerService {
 
   async saveToAuditLog(
     action: string,
-    request: string,
-    response: string,
+    request: string | null,
+    response: string | null,
     userId?: number,
     status?: number,
     error?: string,
@@ -40,9 +40,9 @@ export class CustomLogger implements LoggerService {
         data: {
           userId: userId ?? 0,
           action,
-          request,
-          response,
-          error: error || null,
+          request: request ?? '',
+          response: response ?? '',
+          error: error ?? '',
           status: status ?? 200,
           lineNumber,
         },

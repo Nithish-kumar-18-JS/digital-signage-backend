@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req, Put, Query } from '@nestjs/common';
 import { MediaService } from '../media/media.service';
 import { TokenAuthGuard } from 'src/auth/auth.guard';
 
@@ -10,6 +10,11 @@ export class MediaController {
   @Get()
   async findAll(@Req() req) {
     return this.mediaService.findAll(req.user.id);
+  }
+
+  @Get('/search')
+  async search(@Query('query') query: string) {
+    return this.mediaService.search(query);
   }
 
   @Get(':id')
@@ -31,4 +36,6 @@ export class MediaController {
   async remove(@Param('id') id: string) {
     return this.mediaService.remove(Number(id));
   }
+
+  
 }
