@@ -132,7 +132,7 @@ model Screen {
 
 model Schedule {
   id         Int      @id @default(autoincrement())
-  screenId   Int
+  screenId   Int?
   assignedAt DateTime @default(now())
   name       String
   description String?
@@ -144,7 +144,7 @@ model Schedule {
   createdById       Int
   createdBy         User               @relation(fields: [createdById], references: [id])
   schedulePlaylists SchedulePlaylist[] @relation("ScheduleToItems")
-  screen            Screen             @relation("ScreenToSchedules", fields: [screenId], references: [id])
+  screen            Screen?             @relation("ScreenToSchedules", fields: [screenId], references: [id])
 }
 
 model SchedulePlaylist {

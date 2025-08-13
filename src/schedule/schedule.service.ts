@@ -16,7 +16,11 @@ export class ScheduleService {
   create(data: any, userId: number) {
     const scheduleData = {
       ...data,
-      createdById: userId,
+      startTime: new Date(data.startTime),
+      endTime: new Date(data.endTime),
+      createdBy: {
+        connect: { id: userId },
+      },
     }
     return this.prisma.schedule.create({ data: scheduleData });
   }

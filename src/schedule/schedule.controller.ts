@@ -2,14 +2,14 @@ import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req } from '@nes
 import { ScheduleService } from './schedule.service';
 import { TokenAuthGuard } from 'src/auth/auth.guard';
 
-@Controller('schedules')
+@Controller('schedule')
 @UseGuards(TokenAuthGuard)
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   @Get()
   async findAll(@Req() req) {
-    return this.scheduleService.findAll(req.user.userId);
+    return this.scheduleService.findAll(req.user.id);
   }
 
   @Get(':id')
@@ -19,7 +19,7 @@ export class ScheduleController {
 
   @Post()
   async create(@Body() data: any, @Req() req) {
-    return this.scheduleService.create(data, req.user.userId);
+    return this.scheduleService.create(data, req.user.id);
   }
 
   @Delete(':id')
