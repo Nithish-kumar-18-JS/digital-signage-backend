@@ -134,7 +134,8 @@ model Schedule {
   id         Int      @id @default(autoincrement())
   screenId   Int
   assignedAt DateTime @default(now())
-
+  name       String
+  description String?
   startTime         DateTime?
   endTime           DateTime?
   daysOfWeek        String?
