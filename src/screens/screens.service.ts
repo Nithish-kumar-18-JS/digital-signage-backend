@@ -24,12 +24,9 @@ export class ScreensService {
         resolution: data.resolution,
         orientation: data.orientation === 'landscape' ? ScreenOrientation.LANDSCAPE : ScreenOrientation.PORTRAIT,
         createdBy: userId,
-        playlists: {
-          create: data.playlists?.length > 0 ? data.playlists.map((playlistId: number, index: number) => ({
-            playlist: { connect: { id: playlistId } },
-            position: index
-          })) : []
-        }
+        playlist: data.playlistId
+        ? { connect: { id: data.playlistId } }
+        : undefined,
       },
       include: {
         schedules: true,
@@ -51,13 +48,9 @@ export class ScreensService {
       ...data,
       status: data.status === 'online' ? ScreenStatus.ONLINE : ScreenStatus.OFFLINE,
       orientation: data.orientation === 'landscape' ? ScreenOrientation.LANDSCAPE : ScreenOrientation.PORTRAIT,
-      playlists: {
-        deleteMany: [],
-        create: data.playlists?.length > 0 ? data.playlists.map((playlistId: number, index: number) => ({
-          playlist: { connect: { id: playlistId } },
-          position: index,
-        })) : [],
-      },
+      playlist: data.playlistId
+      ? { connect: { id: data.playlistId } }
+      : undefined,
     }
     return this.prisma.screen.update({ where: { id }, data: screenData, include: { schedules: true, settings: true } });
   }
