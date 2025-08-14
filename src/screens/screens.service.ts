@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { ScreenOrientation, ScreenStatus } from '@prisma/client';
 
 @Injectable()
 export class ScreensService {
@@ -18,16 +19,16 @@ export class ScreensService {
         name: data.name,
         description: data.description,
         deviceId: data.deviceId,
-        status: data.status,
+        status: data.status === 'online' ? ScreenStatus.ONLINE : ScreenStatus.OFFLINE,
         lastSeen: data.lastSeen,
         resolution: data.resolution,
-        orientation: data.orientation,
+        orientation: data.orientation === 'landscape' ? ScreenOrientation.LANDSCAPE : ScreenOrientation.PORTRAIT,
         createdBy: userId,
         playlists: {
-          create: data.playlists.map((playlistId: number, index: number) => ({
+          create: data.playlists?.length > 0 ? data.playlists.map((playlistId: number, index: number) => ({
             playlist: { connect: { id: playlistId } },
             position: index
-          }))
+          })) : []
         }
       },
       include: {
@@ -48,12 +49,14 @@ export class ScreensService {
   update(id: number, data: any) {
     const screenData = {
       ...data,
+      status: data.status === 'online' ? ScreenStatus.ONLINE : ScreenStatus.OFFLINE,
+      orientation: data.orientation === 'landscape' ? ScreenOrientation.LANDSCAPE : ScreenOrientation.PORTRAIT,
       playlists: {
         deleteMany: [],
-        create: data.playlists.map((playlistId: number, index: number) => ({
+        create: data.playlists?.length > 0 ? data.playlists.map((playlistId: number, index: number) => ({
           playlist: { connect: { id: playlistId } },
           position: index,
-        })),
+        })) : [],
       },
     }
     return this.prisma.screen.update({ where: { id }, data: screenData, include: { schedules: true, settings: true } });
