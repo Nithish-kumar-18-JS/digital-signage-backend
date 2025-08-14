@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req, Put } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { TokenAuthGuard } from 'src/auth/auth.guard';
 
@@ -25,5 +25,10 @@ export class ScheduleController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.scheduleService.remove(Number(id));
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() data: any, @Req() req) {
+    return this.scheduleService.update(Number(id), data, req.user.id);
   }
 }

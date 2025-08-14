@@ -18,11 +18,29 @@ export class ScheduleService {
       ...data,
       startTime: new Date(data.startTime),
       endTime: new Date(data.endTime),
+      screen: data.screenId
+      ? { connect: { id: data.screenId } }
+      : undefined,
       createdBy: {
         connect: { id: userId },
       },
     }
     return this.prisma.schedule.create({ data: scheduleData });
+  }
+
+  update(id: number, data: any, userId: number) {
+    const scheduleData = {
+      ...data,
+      startTime: new Date(data.startTime),
+      endTime: new Date(data.endTime),
+      screen: data.screenId
+      ? { connect: { id: data.screenId } }
+      : undefined,
+      createdBy: {
+        connect: { id: userId },
+      },
+    }
+    return this.prisma.schedule.update({ where: { id }, data: scheduleData });
   }
 
   remove(id: number) {
