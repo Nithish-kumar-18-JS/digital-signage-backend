@@ -95,13 +95,14 @@ model Playlist {
 model PlaylistItem {
   id               Int     @id @default(autoincrement())
   playlistId       Int
-  mediaId          Int
+  mediaId          Int?
   position         Int
   durationOverride Int?
   transitionEffect String?
-
+  screenId         Int?
   playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  media    Media    @relation(fields: [mediaId], references: [id])
+  media    Media?    @relation(fields: [mediaId], references: [id])
+  screen Screen? @relation("ScreenToPlaylistItems", fields: [screenId], references: [id], onDelete: Cascade)
 }
 
 model Setting {
@@ -125,11 +126,16 @@ model Screen {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   createdBy   Int
-
+  playlists PlaylistItem[] @relation("ScreenToPlaylistItems")
   settings  Setting[]
   schedules Schedule[] @relation("ScreenToSchedules")
 }
 
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
 model Schedule {
   id         Int      @id @default(autoincrement())
   screenId   Int?
@@ -140,11 +146,13 @@ model Schedule {
   endTime           DateTime?
   daysOfWeek        String?
   repeatDaily       Boolean            @default(true)
-  priority          Int                @default(0)
+  priority          Priority @default(LOW)             
   createdById       Int
   createdBy         User               @relation(fields: [createdById], references: [id])
   schedulePlaylists SchedulePlaylist[] @relation("ScheduleToItems")
-  screen            Screen?             @relation("ScreenToSchedules", fields: [screenId], references: [id])
+  screen            Screen?           @relation("ScreenToSchedules", fields: [screenId], references: [id])
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 }
 
 model SchedulePlaylist {
