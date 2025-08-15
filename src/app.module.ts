@@ -21,6 +21,7 @@ import { CustomLogger } from './common/logger/custom-logger';
 import { AuditInterceptor } from './common/logger/audit-interceptor';
 import { DashboardController } from './dashboard/dashboard.controller';
 import { DashboardService } from './dashboard/dashboard.service';
+import { WebplayerGateway } from './webplayer/webplayer.gateway';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -31,7 +32,7 @@ import { DashboardService } from './dashboard/dashboard.service';
     ScheduleModule,
     ScreensModule,
   ],
-  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService,AuthService,CustomLogger,AuditInterceptor,DashboardService],
+  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService,AuthService,CustomLogger,AuditInterceptor,DashboardService, WebplayerGateway],
   controllers: [UserController, MediaController, UploadController,AuthController,DashboardController],
 })
 export class AppModule {}
