@@ -29,7 +29,6 @@ export class DashboardService {
      let screens = await this.prisma.screen.findMany({
       where: {
         createdBy: userId,
-        status: 'ONLINE',
       },
      })
 
@@ -86,7 +85,8 @@ export class DashboardService {
       },
     });
 
-     dashboardData.screens.active = screens.length;
+     dashboardData.screens.total = screens.length;
+     dashboardData.screens.active = screens.filter(screen => screen.status === 'ONLINE').length;
      dashboardData.screens.inactive = inactiveScreens.length;
      dashboardData.screens.recentlyAdded = recentlyAddedScreens.length;
 

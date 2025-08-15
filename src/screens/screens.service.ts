@@ -44,14 +44,16 @@ export class ScreensService {
   }
 
   update(id: number, data: any) {
+    const { playlistId, ...updateData } = data;
     const screenData = {
-      ...data,
+      ...updateData,
       status: data.status === 'online' ? ScreenStatus.ONLINE : ScreenStatus.OFFLINE,
       orientation: data.orientation === 'landscape' ? ScreenOrientation.LANDSCAPE : ScreenOrientation.PORTRAIT,
-      playlist: data.playlistId
-      ? { connect: { id: data.playlistId } }
-      : undefined,
+      playlist: playlistId
+        ? { connect: { id: playlistId } }
+        : undefined,
     }
+    delete screenData.id;
     return this.prisma.screen.update({ where: { id }, data: screenData, include: { schedules: true, settings: true } });
   }
 }
