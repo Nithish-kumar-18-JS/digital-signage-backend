@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { ScreenOrientation, ScreenStatus } from '@prisma/client';
+import { WebplayerGateway } from '../webplayer/webplayer.gateway';
 
 @Injectable()
 export class ScreensService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService , private webplayerGateway: WebplayerGateway) {}
   findAll(userId: number) {
     return this.prisma.screen.findMany({ where: { createdBy: userId }, include: { schedules: true, settings: true } });
   }
@@ -43,7 +44,7 @@ export class ScreensService {
     return this.prisma.screen.delete({ where: { id }, include: { schedules: true, settings: true } });
   }
 
-  update(id: number, data: any) {
+  async update(id: number, data: any) {
     const { playlistId, ...updateData } = data;
     const screenData = {
       ...updateData,
@@ -54,6 +55,16 @@ export class ScreensService {
         : undefined,
     }
     delete screenData.id;
-    return this.prisma.screen.update({ where: { id }, data: screenData, include: { schedules: true, settings: true } });
+    let sendClientData = await this.prisma.screen.update({ where: { id }, data: screenData, include: { schedules: true, settings: true  , playlist: {
+      include: {
+        items: {
+          include: {
+            media: true
+          }
+        }
+      }
+    } } });
+    await this.webplayerGateway.sendMessageToAll('screenUpdated',JSON.stringify(sendClientData))
+    return sendClientData;
   }
 }

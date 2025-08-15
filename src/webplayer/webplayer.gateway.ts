@@ -19,8 +19,14 @@ export class WebplayerGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: any): string {
+  handleMessage(client: Socket, payload: any): any {
     console.log('📩 Received:', payload);
-    return 'Hello world!';
+    return payload;
   }
+
+  // send message to client
+  sendMessageToAll(event: string, data: any) {
+    this.server.emit(event, data); // send to all connected clients
+  }
+
 }
