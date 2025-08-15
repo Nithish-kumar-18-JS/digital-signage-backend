@@ -7,19 +7,27 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async findOne(email: string) {
+   try {
     return this.prisma.user.findUnique({
       where: {
         email,
       },
-    });
+    });    
+   } catch (error) {
+    return null
+   }
   }
 
   async findUser(id: number) {
+   try {
     return this.prisma.user.findUnique({
       where: {
         id,
       },
-    });
+    });    
+   } catch (error) {
+    return null
+   }
   }
 
   async create(data: {
@@ -28,6 +36,7 @@ export class UserService {
     lastName: string;
     password: string;
   }) {
+   try {
     return this.prisma.user.create({
       data: {
         email: data.email,
@@ -36,5 +45,8 @@ export class UserService {
         password: data.password,
       },
     });
+   } catch (error) {
+    throw error
+   }
   }
 }

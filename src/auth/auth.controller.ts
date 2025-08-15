@@ -2,13 +2,14 @@ import { Controller, Post, Body, Req, BadRequestException } from '@nestjs/common
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
+import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService, private userService: UserService) {}
 
   @Post('login')
-  async login(@Body() body) {
+  async login(@Body() body: { email: string; password: string }) {
     const { email , password } = body;
     const user = await this.userService.findOne(email);
     if (!user) {
@@ -23,14 +24,14 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signup(@Body() body) {
+  async signup(@Body() body: { email: string; firstName: string; lastName: string; password: string }) {
     const { email , firstName , lastName , password } = body;
     const user = await this.userService.findOne(email);
     if (user) {
       throw new BadRequestException('User already exists');
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await this.userService.create({
+    const newUser: User = await this.userService.create({
       email,
       firstName,
       lastName,

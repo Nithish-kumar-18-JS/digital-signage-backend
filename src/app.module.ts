@@ -19,6 +19,8 @@ import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 import { CustomLogger } from './common/logger/custom-logger';
 import { AuditInterceptor } from './common/logger/audit-interceptor';
+import { DashboardController } from './dashboard/dashboard.controller';
+import { DashboardService } from './dashboard/dashboard.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,7 +31,7 @@ import { AuditInterceptor } from './common/logger/audit-interceptor';
     ScheduleModule,
     ScreensModule,
   ],
-  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService,AuthService,CustomLogger,AuditInterceptor],
-  controllers: [UserController, MediaController, UploadController,AuthController],
+  providers: [ClerkService, UserService, PrismaService, MediaService, R2Service,ScreensService,ScheduleService,PlaylistsService,AuthService,CustomLogger,AuditInterceptor,DashboardService],
+  controllers: [UserController, MediaController, UploadController,AuthController,DashboardController],
 })
 export class AppModule {}
