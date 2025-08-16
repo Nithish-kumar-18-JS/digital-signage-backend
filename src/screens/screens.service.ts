@@ -55,7 +55,7 @@ export class ScreensService {
         : undefined,
     }
     delete screenData.id;
-    let sendClientData = await this.prisma.screen.update({ where: { id }, data: screenData, include: { schedules: true, settings: true  , playlist: {
+    let sendClientData:any = await this.prisma.screen.update({ where: { id }, data: screenData, include: { schedules: true, settings: true  , playlist: {
       include: {
         items: {
           include: {
@@ -64,6 +64,7 @@ export class ScreensService {
         }
       }
     } } });
+    sendClientData.screenUpdate = true;
     await this.webplayerGateway.sendMessageToAll('screenUpdated',JSON.stringify(sendClientData))
     return sendClientData;
   }
