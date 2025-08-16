@@ -10,11 +10,11 @@ RUN npm install
 COPY prisma ./prisma
 RUN npx prisma generate
 
-# Copy rest of the source code
+# Copy source code
 COPY . .
 
-# Build your app
+# Build app
 RUN npm run build
 
-# Run migrations + start app (at runtime, when DB is accessible)
-CMD npx prisma migrate deploy && npm start
+# Run migrations and start server
+CMD npx prisma migrate deploy && npm run start
