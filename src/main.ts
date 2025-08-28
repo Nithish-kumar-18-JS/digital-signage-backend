@@ -18,6 +18,9 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useGlobalInterceptors(app.get(AuditInterceptor));
   app.useGlobalFilters(new HttpExceptionFilter());
+  
+  // check db connected succesfully
+  
 
   const port = process.env.PORT || 3000;  // ✅ use Render’s port if available
   await app.listen(port, '0.0.0.0');      // ✅ listen on all interfaces

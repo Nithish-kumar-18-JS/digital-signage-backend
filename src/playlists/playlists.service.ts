@@ -5,16 +5,16 @@ import { PrismaService } from '../prisma.service';
 export class PlaylistsService {
   constructor(private prisma: PrismaService) {}
 
-  findAll(userId: number) {
-    return this.prisma.playlist.findMany({ where: { createdBy: { id: userId } }, include: { items: {
+  async findAll(userId: number) {
+    return await this.prisma.playlist.findMany({ where: { createdBy: { id: userId } }, include: { items: {
       include: {
         media: true
       }
     } } });
   }
 
-  findOne(id: number) {
-    return this.prisma.playlist.findUnique({ where: { id }, include: { items: {
+  async findOne(id: number) {
+    return await this.prisma.playlist.findUnique({ where: { id }, include: { items: {
       include: {
         media: true
       }
@@ -23,7 +23,8 @@ export class PlaylistsService {
 
   async create(data: any, userId: number) {
     try {
-      return await this.prisma.playlist.create({
+      let response: any = {}
+      response.data = await this.prisma.playlist.create({
         data: {
           name: data.name,
           description: data.description,
@@ -38,34 +39,55 @@ export class PlaylistsService {
           },
         },
       });
+      response.data.message = "Playlist created successfully ID : " + response.data.id;
+      return response;
     } catch (error) {
-      console.error(error);
+      let response: any = {}
+      response.data.message = "Playlist creation failed";
       throw error;
     }
   }
   
 
 
-  update(id: number, data: any) {
-    const playlistData = {
-      name: data.name,
-      description: data.description,
-      items: {
-        deleteMany: [],
-        create: data.items.map((mediaId: number, index: number) => ({
-          media: { connect: { id: mediaId } },
-          position: index,
-        })),
-      },
+  async update(id: number, data: any) {
+    try {
+      const playlistData = {
+        name: data.name,
+        description: data.description,
+        items: {
+          deleteMany: [],
+          create: data.items.map((mediaId: number, index: number) => ({
+            media: { connect: { id: mediaId } },
+            position: index,
+          })),
+        },
+      }
+      let response: any = {}
+      response.data = await this.prisma.playlist.update({ where: { id }, data: playlistData });
+      response.data.message = "Playlist updated successfully ID : " + response.data.id;
+      return response;
+    } catch (error) {
+      let response: any = {}
+      response.data.message = "Playlist update ID : " + id;
+      throw error;
     }
-    return this.prisma.playlist.update({ where: { id }, data: playlistData });
   }
 
-  remove(id: number) {
-    return this.prisma.playlist.delete({ where: { id } });
+  async remove(id: number) {
+    try {
+      let response: any = {}
+      response.data = await this.prisma.playlist.delete({ where: { id } });
+      response.data.message = "Playlist deleted successfully ID : " + response.data.id;
+      return response;
+    } catch (error) {
+      let response: any = {}
+      response.data.message = "Playlist deletion ID : " + id;
+      throw error;
+    }
   }
 
-  searchPlaylists(query: string) {
-    return this.prisma.playlist.findMany({ where: { name: { contains: query, mode: 'insensitive' } } });
+  async searchPlaylists(query: string) {
+    return await this.prisma.playlist.findMany({ where: { name: { contains: query, mode: 'insensitive' } } });
   }
 }

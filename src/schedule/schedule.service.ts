@@ -6,15 +6,15 @@ import { Priority } from '@prisma/client'; // Make sure your Prisma schema has P
 export class ScheduleService {
   constructor(private prisma: PrismaService) {}
 
-  findAll(userId: number) {
-    return this.prisma.schedule.findMany({
+  async findAll(userId: number) {
+    return await this.prisma.schedule.findMany({
       where: { createdById: userId },
       include: { schedulePlaylists: true, screen: true },
     });
   }
 
-  findOne(id: number) {
-    return this.prisma.schedule.findUnique({
+  async findOne(id: number) {
+    return await this.prisma.schedule.findUnique({
       where: { id },
       include: { schedulePlaylists: true, screen: true },
     });
@@ -38,15 +38,19 @@ export class ScheduleService {
           connect: { id: userId },
         },
       };
-      return await this.prisma.schedule.create({ data: scheduleData });
+      let response: any = {}
+      response.data = await this.prisma.schedule.create({ data: scheduleData });
+      response.data.message = "Schedule created successfully ID : " + response.data.id;
+      return response;
     } catch (error) {
-      console.error('Error creating schedule:', error);
+      let response: any = {}
+      response.data.message = "Schedule creation failed";
       throw error;
     }
   }
   
 
-  update(id: number, data: any, userId: number) {
+  async update(id: number, data: any, userId: number) {
     const { screenId, ...restData } = data;
     const scheduleData = {
       ...restData,
@@ -63,13 +67,28 @@ export class ScheduleService {
         connect: { id: userId },
       },
     };
-    return this.prisma.schedule.update({
-      where: { id },
-      data: scheduleData,
-    });
+    try {
+      let response: any = {}
+      response.data = await this.prisma.schedule.update({ where: { id }, data: scheduleData });
+      response.data.message = "Schedule updated successfully ID : " + response.data.id;
+      return response;
+    } catch (error) {
+      let response: any = {}
+      response.data.message = "Schedule update ID : " + id;
+      throw error;
+    }
   }
 
-  remove(id: number) {
-    return this.prisma.schedule.delete({ where: { id } });
+  async remove(id: number) {
+    try {
+      let response: any = {}
+      response.data = await this.prisma.schedule.delete({ where: { id } });
+      response.data.message = "Schedule deleted successfully ID : " + response.data.id;
+      return response;
+    } catch (error) {
+      let response: any = {}
+      response.data.message = "Schedule deletion ID : " + id;
+      throw error;
+    }
   }
 }

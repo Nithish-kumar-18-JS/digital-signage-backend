@@ -5,52 +5,68 @@ import { PrismaService } from '../prisma.service';
 export class MediaService {
   constructor(private prisma: PrismaService) {}
 
-  findAll(userId: number) {
+  async findAll(userId: number) {
     try {
-      return this.prisma.media.findMany({ where: { uploadedById: userId }, include: { playlistItems: true } });
+      return await this.prisma.media.findMany({ where: { uploadedById: userId }, include: { playlistItems: true } });
     } catch (error) {
       throw error;
     }
   }
-  findOne(id: number) {
+  async findOne(id: number) {
     try {
-      return this.prisma.media.findUnique({ where: { id }, include: { playlistItems: true } });
+      return await this.prisma.media.findUnique({ where: { id }, include: { playlistItems: true } });
     } catch (error) {
       throw error;
     }
   }
 
-  create(data: any, userId: number) {
+  async create(data: any, userId: number) {
     try {
       const mediaData = {
         ...data,
         uploadedById: userId,
       }
-      return this.prisma.media.create({ data: mediaData });
+      let response: any = {}
+      response.data = await this.prisma.media.create({ data: mediaData });
+      response.data.message = "Media created successfully ID : " + response.data.id;
+      return response;
     } catch (error) {
+      let response: any = {}
+      response.data.message = "Media creation failed";
       throw error;
     }
   }
 
-  update(id: number, data: any) {
+  async update(id: number, data: any) {
     try {
-      return this.prisma.media.update({ where: { id }, data });
+      let response: any = {}
+      response.data = await this.prisma.media.update({ where: { id }, data });
+      response.data.message = "Media updated successfully ID : " + response.data.id;
+      return response;
     } catch (error) {
+      let response: any = {}
+      response.data.message = "Media update ID : " + id;
       throw error;
     }
   }
 
-  remove(id: number) {
+  async remove(id: number) {
     try {
-      return this.prisma.media.delete({ where: { id } });
+      let response: any = {}
+      console.log(typeof id)
+      response.data = await this.prisma.media.delete({ where: { id } });
+      response.data.message = "Media deleted successfully ID : " + id;
+      return response;
     } catch (error) {
+      let response: any = {}
+      response.data.message = "Media deletion ID : " + id;
       throw error;
     }
   }
 
-  search(query: string) {
+  async search(query: string) {
     try {
-      return this.prisma.media.findMany({ where: { name: { contains: query, mode: 'insensitive' } } });
+      return await this.prisma.media.findMany({ where: { name: { contains: query, mode: 'insensitive' } } });
     } catch (error) {
       throw error;
     }

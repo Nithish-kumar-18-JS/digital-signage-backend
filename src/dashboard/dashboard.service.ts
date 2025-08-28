@@ -24,6 +24,7 @@ export class DashboardService {
         total : 0,
         recentlyAdded :0,
       },
+      activityLogs : {}
      }
 
      let screens = await this.prisma.screen.findMany({
@@ -85,6 +86,28 @@ export class DashboardService {
       },
     });
 
+    let activityLogs:any = await this.prisma.auditLog.findMany({
+      where: {
+        userId: userId,
+        response: {
+          contains: 'message',
+      }
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 10,
+    });
+    activityLogs = activityLogs.map((log,index) => {
+      let parseResponse = JSON.parse(log.response)
+      if(parseResponse.data?.message){
+        return {
+          response: parseResponse.data.message,
+          createdAt: log.createdAt,
+        }
+      }
+    })
+
      dashboardData.screens.total = screens.length;
      dashboardData.screens.active = screens.filter(screen => screen.status === 'ONLINE').length;
      dashboardData.screens.inactive = inactiveScreens.length;
@@ -95,6 +118,8 @@ export class DashboardService {
 
      dashboardData.media.total = totalMediaCount;
      dashboardData.media.recentlyAdded = recentlyAddedMediaCount;
+
+     dashboardData.activityLogs = activityLogs;
 
      return dashboardData;
   }

@@ -10,6 +10,10 @@ export class WebplayerGateway implements OnGatewayConnection, OnGatewayDisconnec
   @WebSocketServer()
   server: Server;
 
+  handleWebSocketCheckIn(client: Socket) {
+    console.log('✅ Client connected:', client.id);
+  }
+
   handleConnection(client: Socket) {
     console.log('✅ Client connected:', client.id);
   }
@@ -26,6 +30,7 @@ export class WebplayerGateway implements OnGatewayConnection, OnGatewayDisconnec
 
   // send message to client
   sendMessageToAll(event: string, data: any) {
+    console.log('📩 Sending');
     this.server.emit(event, data); // send to all connected clients
   }
 
