@@ -2,7 +2,7 @@ FROM node:18
 
 WORKDIR /app
 
-# Install deps
+# Install deps first (better caching)
 COPY package*.json ./
 RUN npm install
 
@@ -11,14 +11,11 @@ COPY .env .env
 COPY prisma ./prisma
 RUN npx prisma generate
 
-# Copy the rest
+# Copy source code
 COPY . .
 
 # Apply Prisma migration
 RUN npx prisma migrate deploy
-
-# Install dependencies
-RUN npm install
 
 # Build app
 RUN npm run build
